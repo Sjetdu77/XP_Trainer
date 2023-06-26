@@ -40,7 +40,7 @@ for (const file of commandFiles) {
 }
 
 client.on(Events.InteractionCreate, async interaction => {
-    const username = `${interaction.user.username}#${interaction.user.discriminator}`;
+    //const username = `${interaction.user.username}#${interaction.user.discriminator}`;
 
     if (interaction.isChatInputCommand()) {
 		const command = interaction.client.commands.get(interaction.commandName);
