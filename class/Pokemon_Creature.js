@@ -1,6 +1,4 @@
 const { DataTypes, Model } = require('sequelize');
-const { Pokemon_Specie } = require('./Pokemon_Specie');
-const { Pokemon_Trainer } = require('./Pokemon_Trainer');
 const { dataBaseTable } = require('./table_models.js');
 
 
