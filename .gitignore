@@ -2,3 +2,5 @@ config.json
 fill.js
 pokebase.sqlite
 accessToLists.js
+deploy-commands.js
+.env
