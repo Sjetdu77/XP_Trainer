@@ -30,7 +30,7 @@ Pokemon_Specie.Evolution = Pokemon_Specie.belongsToMany(Pokemon_Specie, { as: 'e
 Pokemon_Specie.Origin = Pokemon_Specie.belongsToMany(originForm, { through: specie_origin, as: 'origin' });
 originForm.Species = originForm.belongsToMany(Pokemon_Specie, { through: specie_origin });
 
-async function synchronize() {
+async function synchronize(restart = false) {
     await Pokemon_Specie.sync();
     await Pokemon_Creature.sync();
     await Pokemon_Trainer.sync();
@@ -38,18 +38,20 @@ async function synchronize() {
     await originForm.sync();
     await specie_origin.sync();
 
-    await Pokemon_Creature.destroy({ where: {
-        [Op.or]: [
-            { team: null },
-            { place: 'wild' }
-        ]
-    }});
-
-    const allTrainers = await Pokemon_Trainer.findAll();
-    for (const trainer of allTrainers) {
-        const creatures = await trainer.getCreatures();
-        if (creatures.length === 0) {
-            trainer.destroy();
+    if (!restart) {
+        await Pokemon_Creature.destroy({ where: {
+            [Op.or]: [
+                { team: null },
+                { place: 'wild' }
+            ]
+        }});
+    
+        const allTrainers = await Pokemon_Trainer.findAll();
+        for (const trainer of allTrainers) {
+            const creatures = await trainer.getCreatures();
+            if (creatures.length === 0) {
+                trainer.destroy();
+            }
         }
     }
 }

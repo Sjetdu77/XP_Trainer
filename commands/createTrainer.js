@@ -45,11 +45,8 @@ module.exports = {
             }
         });
         
-        let username = `${interaction.user.username}#${interaction.user.discriminator}`;
-        let firstData = {
-            name: name,
-            username: username
-        };
+        let userId = interaction.user.id;
+        let firstData = { name, userId };
         if (!await Pokemon_Trainer.findOne({where: firstData})) {
             if (!pokemonFounded) {
                 return await interaction.reply({

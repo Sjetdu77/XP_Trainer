@@ -34,12 +34,9 @@ module.exports = {
         const pokemon = interaction.options.getString('pokemon');
         const experience = interaction.options.getInteger('xp');
 
-        const username = `${interaction.user.username}#${interaction.user.discriminator}`;
+        const userId = interaction.user.id;
         const trainerFounded = await Pokemon_Trainer.findOne({
-            where: {
-                name: trainer,
-                username
-            }
+            where: { name: trainer, userId }
         });
 
         if (!trainerFounded) {

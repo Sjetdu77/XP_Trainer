@@ -99,8 +99,12 @@ module.exports = {
             return;
         }
 
+        let toFind = await Pokemon_Trainer.findAll();
+        console.log(toFind);
+        console.log(user.id);
+
         let datas = await Pokemon_Trainer.findAll({
-            where: { username: `${user.username}#${user.discriminator}` },
+            where: { userId: user.id },
             include: [Pokemon_Trainer.Team]
         });
         if (datas.length === 0) {

@@ -34,11 +34,10 @@ module.exports = {
         const pokemon = interaction.options.getString('pokemon');
         const evolution = interaction.options.getString('evolution');
 
-        const username = `${interaction.user.username}#${interaction.user.discriminator}`;
-        const trainerFounded = await Pokemon_Trainer.findOne({ where: {
-            name: trainer,
-            username
-        } });
+        const userId = interaction.user.id;
+        const trainerFounded = await Pokemon_Trainer.findOne({
+            where: { name: trainer, userId }
+        });
 
         if (!trainerFounded) {
             return await interaction.reply({

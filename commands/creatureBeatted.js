@@ -38,11 +38,11 @@ module.exports = {
         const level = interaction.options.getInteger('level');
         const returned = await createCreature(interaction, null, specie, level);
 
-        const username = `${interaction.user.username}#${interaction.user.discriminator}`;
-        const trainerFounded = await Pokemon_Trainer.findOne({ where: {
-            name: trainer,
-            username
-        }, include: [ Pokemon_Trainer.Team ] });
+        const userId = interaction.user.id;
+        const trainerFounded = await Pokemon_Trainer.findOne({
+            where: { name: trainer, userId},
+            include: [ Pokemon_Trainer.Team ]
+        });
         if (!trainerFounded) {
             return await interaction.reply({
                 content: `${trainer} n'est pas un Dresseur.`,

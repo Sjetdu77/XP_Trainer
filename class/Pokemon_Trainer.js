@@ -17,7 +17,7 @@ Pokemon_Trainer.init({
         primaryKey: true
     },
     name: DataTypes.STRING,
-    username: DataTypes.STRING,
+    userId: DataTypes.STRING,
     avatar: {
         type: DataTypes.STRING,
         allowNull: true

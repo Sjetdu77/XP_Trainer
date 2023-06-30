@@ -34,11 +34,11 @@ module.exports = {
         const first = interaction.options.getString('first_pokémon');
         const second = interaction.options.getString('second_pokémon');
 
-        const username = `${interaction.user.username}#${interaction.user.discriminator}`;
-        const trainerFounded = await Pokemon_Trainer.findOne({ where: {
-            name: trainer,
-            username
-        }, include: [ Pokemon_Trainer.Team ] });
+        const userId = interaction.user.id;
+        const trainerFounded = await Pokemon_Trainer.findOne({
+            where: { name: trainer, userId },
+            include: [ Pokemon_Trainer.Team ]
+        });
         if (!trainerFounded) {
             return await interaction.reply({
                 content: `${trainer} n'est pas un Dresseur.`,
