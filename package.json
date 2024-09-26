@@ -9,14 +9,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.4.0",
-    "csv": "^6.3.1",
+    "axios": "^1.7.7",
+    "csv": "^6.3.10",
     "csv-parser": "^3.0.0",
-    "csv-stringify": "^6.4.0",
-    "discord.js": "^14.11.0",
-    "jsdom": "^22.1.0",
-    "needle": "^3.2.0",
-    "sequelize": "^6.32.1",
-    "sqlite3": "^5.1.6"
+    "csv-stringify": "^6.5.1",
+    "discord.js": "^14.16.2",
+    "jsdom": "^25.0.0",
+    "lodash": "^4.17.21",
+    "needle": "^3.3.1",
+    "sequelize": "^6.37.3",
+    "sqlite3": "^5.1.7",
+    "xp-trainer": "file:"
   }
 }

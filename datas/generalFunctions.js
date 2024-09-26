@@ -82,6 +82,7 @@ async function createCreature(interaction, trainer, specieOrigin, level, otherVa
     let data = {
         ...{
             level,
+            actualXP: specieFounded.calculateLvlXP(level - 1),
             specieId: specieFounded.id,
             origin: origin
         },

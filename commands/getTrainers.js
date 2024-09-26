@@ -30,12 +30,14 @@ async function createEmbedModel(trainer, creatures, species) {
     for (const [creature, specie] of inTeam) {
         const rate = await creature.getXPRate() * 100;
 
+        console.log(rate);
+
         let name = `${creature.nickname ? creature.nickname : specie.name}`;
         let value = `${specie.name} niveau ${creature.level}\n`;
         value += `Bonheur : ${creature.happiness}\n`;
         value += '`XP: [';
-        for (let t = 1; t <= 50; t++) {
-            if (rate / 2 >= t) {
+        for (let t = 1; t <= 25; t++) {
+            if (rate / 4 >= t) {
                 value += '|';
             } else {
                 value += ' ';
@@ -98,10 +100,6 @@ module.exports = {
             });
             return;
         }
-
-        let toFind = await Pokemon_Trainer.findAll();
-        console.log(toFind);
-        console.log(user.id);
 
         let datas = await Pokemon_Trainer.findAll({
             where: { userId: user.id },

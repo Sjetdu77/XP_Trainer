@@ -4,12 +4,11 @@ const {
 } = require('discord.js');
 const { Pokemon_Trainer } = require('../classes');
 const { createCreature } = require('../datas/generalFunctions');
-const { Op } = require("sequelize");
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('get_new_pokemon')
-        .setDescription(`Permet d'obtenir un pokémon au début de la partie.`)
+        .setDescription(`Permet d'obtenir un nouveau pokémon.`)
         .addStringOption(option => 
             option.setName('trainer')
                 .setDescription('Dresseur qui obtient le pokémon')

@@ -73,8 +73,7 @@ module.exports = {
                             new StringSelectMenuBuilder()
                                 .setCustomId('winners')
                                 .setPlaceholder('No winner?')
-                                .setMinValues(1)
-                                .setMaxValues(6)
+                            	.setMinValues(1)
                                 .addOptions(options)
                         )
 

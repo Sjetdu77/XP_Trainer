@@ -4,3 +4,4 @@ pokebase.sqlite
 accessToLists.js
 deploy-commands.js
 .env
+node_modules

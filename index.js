@@ -67,9 +67,9 @@ client.on(Events.InteractionCreate, async interaction => {
 			for (const creature of allCreaturesWith) {
 				const specie = await creature.getSpecie();
 				const gains = await creature.gainXPViaFoe(Stock.creatureSaved[trainer.id], selected.includes(`${creature.id}`));
-				content += `${creature.nickname ? creature.nickname : specie.name} gagne ${gains[0]} point d'expérience.\n`;
+				content += `${creature.nickname ? creature.nickname : specie.name} gagne ${gains[0]} points d'expérience.\n`;
 				if (gains[1] > 0) {
-					content += `${creature.nickname ? creature.nickname : specie.name} gagne ${gains[1]} niveaux.\n`
+					content += `${creature.nickname ? creature.nickname : specie.name} gagne ${gains[1]} niveau${gains[1] > 1 ? 'x' : ''}.\n`
 				}
 				content += '\n';
 			}

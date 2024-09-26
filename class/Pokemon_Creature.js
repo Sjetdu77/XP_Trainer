@@ -40,7 +40,6 @@ class Pokemon_Creature extends Model {
         while (this.actualXP >= maxXP) {
             numLevelUp++;
             this.level++;
-            this.actualXP -= maxXP;
 
             if (this.happiness < 100) {
                 this.happiness += 3;
@@ -58,8 +57,6 @@ class Pokemon_Creature extends Model {
     }
 
     async gainLevels(lvl) {
-        this.actualXP = 0;
-
         for (let l = 0 ; l < lvl ; l++) {
             this.level++;
             if (this.happiness < 100) {
@@ -70,8 +67,15 @@ class Pokemon_Creature extends Model {
         }
         this.level += lvl;
 
+        this.actualXP = await this.getMinXP();
+
         this.save();
         return lvl;
+    }
+
+    async getMinXP() {
+        const specie = await this.getSpecie();
+        return specie.calculateLvlXP(this.level - 1);
     }
 
     async getMaxXP() {
@@ -86,7 +90,7 @@ class Pokemon_Creature extends Model {
     }
 
     async getXPRate() {
-        return this.actualXP / await this.getMaxXP();
+        return (this.actualXP - await this.getMinXP()) / await this.getMaxXP();
     }
 }
 

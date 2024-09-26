@@ -8,7 +8,7 @@ const { Op } = require("sequelize");
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('rename_pokemon')
-        .setDescription(`Permet d'obtenir un starter.`)
+        .setDescription(`Permet de renommer un pokémon capturé.`)
         .addStringOption(option => 
             option.setName('trainer')
                 .setDescription('Dresseur qui possède le pokémon')
