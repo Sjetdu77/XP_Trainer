@@ -11,7 +11,7 @@ module.exports = {
         .setDescription(`Permet d'obtenir un nouveau pokémon.`)
         .addStringOption(option => 
             option.setName('trainer')
-                .setDescription('Dresseur qui obtient le pokémon')
+                .setDescription('Dresseur associé')
                 .setRequired(true)
         )
         .addStringOption(option => 
@@ -66,8 +66,7 @@ module.exports = {
 
         if (returned) {
             return await interaction.reply({
-                content: `Félicitations pour votre nouveau pokémon, ${trainer} !`,
-                ephemeral: true
+                content: `Félicitations pour votre nouveau pokémon, ${trainer} !`
             });
         }
     }

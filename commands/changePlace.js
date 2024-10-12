@@ -1,27 +1,20 @@
 const {
     SlashCommandBuilder,
-    ChatInputCommandInteraction
+    ChatInputCommandInteraction,
+    ActionRowBuilder,
+    StringSelectMenuBuilder
 } = require('discord.js');
 const { Pokemon_Trainer, Pokemon_Creature, Pokemon_Specie } = require('../classes');
 const { Op } = require("sequelize");
+const { Stock } = require('../datas/stock');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('change_place')
-        .setDescription(`Un pokémon a été vaincu.`)
+        .setDescription(`Permet à un pokémon de changer de place entre l'équipe et le PC.`)
         .addStringOption(option => 
             option.setName('trainer')
-                .setDescription('Dresseur qui a vaincu le pokémon')
-                .setRequired(true)
-        )
-        .addStringOption(option => 
-            option.setName('first_pokémon')
-                .setDescription('Premier pokémon à changer de place')
-                .setRequired(true)
-        )
-        .addStringOption(option =>
-            option.setName('second_pokémon')
-                .setDescription('Deuxième pokémon à changer de place')
+                .setDescription('Dresseur associé')
                 .setRequired(true)
         ),
 
@@ -31,8 +24,6 @@ module.exports = {
      */
     async execute(interaction) {
         const trainer = interaction.options.getString('trainer');
-        const first = interaction.options.getString('first_pokémon');
-        const second = interaction.options.getString('second_pokémon');
 
         const userId = interaction.user.id;
         const trainerFounded = await Pokemon_Trainer.findOne({
@@ -46,63 +37,45 @@ module.exports = {
             });
         }
 
-        const first_specie = await Pokemon_Specie.findOne({
-            where: {
-                [Op.or]: [
-                    { name: first },
-                    { english_name: first }
-                ]
-            }
-        });
-        let first_creature = await trainerFounded.getCreatures({ where: {
-            [Op.or]: [
-                { nickname: first },
-                { specieId: first_specie.id }
-            ]
-        }, include: [ Pokemon_Creature.Specie ] });
-        if (first_creature.length === 0) {
+        Stock.trainerSaved[userId] = [trainerFounded, ''];
+
+        let options = [];
+        const creaturesTeam = await trainerFounded.getCreatures({ where: { place: 'team' }, include: [ Pokemon_Creature.Specie ] });
+        if (creaturesTeam.length === 0) {
             return await interaction.reply({
-                content: `Mais ${trainer} n'a pas de ${first} !`,
+                content: `Mais ${trainer} n'a pas de pokémon dans son équipe !`,
                 ephemeral: true
             });
         }
 
-        const second_specie = await Pokemon_Specie.findOne({
-            where: {
-                [Op.or]: [
-                    { name: second },
-                    { english_name: second }
-                ]
-            }
-        });
-        let second_creature = await trainerFounded.getCreatures({ where: {
-            [Op.or]: [
-                { nickname: second },
-                { specieId: second_specie.id }
-            ]
-        }, include: [ Pokemon_Creature.Specie ] });
-        if (second_creature.length === 0) {
-            return await interaction.reply({
-                content: `Mais ${trainer} n'a pas de ${second} !`,
-                ephemeral: true
-            });
+        const creaturesPC = await trainerFounded.getCreatures({ where: { place: 'computer' }, include: [ Pokemon_Creature.Specie ] });
+        
+        if (creaturesTeam.length < 6 && creaturesPC.length > 0) {
+            options.push({
+                label: `Retirer`,
+                description: `Intégrer dans l'équipe des pokémons pris des boîtes.`,
+                value: `withdraw`
+            })
+        }
+        if (creaturesTeam.length > 1) {
+            options.push({
+                label: `Déposer`,
+                description: `Déposer des pokémons de l'équipe dans des boîtes.`,
+                value: `deposit`
+            })
         }
 
-        first_creature = first_creature[0];
-        second_creature = second_creature[0];
-
-        if (first_creature.place === second_creature.place) {
-            return await interaction.reply({
-                content: `Les deux pokémons sont dans la même place.`
-            });
-        }
-
-        let s = first_creature.place;
-        first_creature.update({ place: second_creature.place })
-        second_creature.update({ place: s });
+        const choices = new ActionRowBuilder()
+                        .addComponents(
+                            new StringSelectMenuBuilder()
+                                .setCustomId('place_choices')
+                                .setPlaceholder(`Retirer ou déposer ?`)
+                                .addOptions(options)
+                        )
 
         return await interaction.reply({
-            content: `Les pokémons ont changé de place.`
-        });
+            content: `Qu'est-ce que vous voulez faire ?`,
+            components: [choices]
+        })
     }
 }

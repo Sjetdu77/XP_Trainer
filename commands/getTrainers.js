@@ -30,25 +30,16 @@ async function createEmbedModel(trainer, creatures, species) {
     for (const [creature, specie] of inTeam) {
         const rate = await creature.getXPRate() * 100;
 
-        console.log(rate);
-
-        let name = `${creature.nickname ? creature.nickname : specie.name}`;
+        const name = `${creature.nickname ? creature.nickname : specie.name}`;
         let value = `${specie.name} niveau ${creature.level}\n`;
         value += `Bonheur : ${creature.happiness}\n`;
         value += '`XP: [';
-        for (let t = 1; t <= 25; t++) {
-            if (rate / 4 >= t) {
-                value += '|';
-            } else {
-                value += ' ';
-            }
-        }
-        value += ']`';
+        for (let t = 1; t <= 25; t++) value += rate / 4 >= t ? '|' : ' ';
+        console.log(rate);
+        value += ']`\n';
+        value += `XP restants : ${await creature.getMaxXP() - creature.actualXP}`;
 
-        embed.fields.push({
-            name,
-            value
-        });
+        embed.fields.push({ name, value });
     }
 
     embed.fields.push({ name: `--- Dans le PC ---`, value: '' });
@@ -59,19 +50,12 @@ async function createEmbedModel(trainer, creatures, species) {
         let value = `${specie.name} niveau ${creature.level}\n`;
         value += `Bonheur : ${creature.happiness}\n`;
         value += '`XP: [';
-        for (let t = 1; t <= 50; t++) {
-            if (rate / 2 >= t) {
-                value += '|';
-            } else {
-                value += ' ';
-            }
-        }
-        value += ']`';
+        for (let t = 1; t <= 25; t++) value += rate / 4 >= t ? '|' : ' ';
+        console.log(rate);
+        value += ']`\n';
+        value += `XP restants : ${await creature.getMaxXP() - creature.actualXP}`;
 
-        embed.fields.push({
-            name,
-            value
-        });
+        embed.fields.push({ name, value });
     }
 
     return embed;

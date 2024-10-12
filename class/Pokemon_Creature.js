@@ -56,6 +56,37 @@ class Pokemon_Creature extends Model {
         return numLevelUp;
     }
 
+    async minusXP(xp) {
+        let lvlLost = 0
+        this.actualXP -= xp;
+        while (this.actualXP < await this.getMinXP()) {
+            this.level--;
+            lvlLost++;
+        }
+
+        this.save();
+        return lvlLost;
+    }
+
+    async minusXPViaFoe(foe) {
+        const trainer = await this.getTrainer();
+        const foesDatas = await foe.getDatasForXP();
+        const trainerDatas = await trainer.getDatasFromTrainer();
+
+        let firstPart = foesDatas.specie.baseXP * foe.level / 5;
+        
+        let experience = firstPart * ((2 * foe.level + 10) / (foe.level + this.level + 10))**2.5 + 1;
+        if (this.exchanged) experience *= 1.5;
+        if (trainerDatas.getLuckyEgg) experience *= 1.5;
+        if (foesDatas.evolutions.length > 0) experience *= 1.5;
+        if (this.happiness >= 200) experience *= 1.2;
+
+        experience = Math.round(experience / 2);
+
+        const lvlLost = this.minusXP(experience);
+        return [experience, lvlLost];
+    }
+
     async gainLevels(lvl) {
         for (let l = 0 ; l < lvl ; l++) {
             this.level++;

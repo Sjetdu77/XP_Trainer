@@ -11,7 +11,7 @@ module.exports = {
         .setDescription(`Permet de gagner de l'expérience brut.`)
         .addStringOption(option => 
             option.setName('trainer')
-                .setDescription('Dresseur qui possède le pokémon')
+                .setDescription('Dresseur associé')
                 .setRequired(true)
         )
         .addStringOption(option => 
@@ -81,8 +81,8 @@ module.exports = {
 
             if (evolutionFounded) {
                 await thePokemonFounded.setSpecie(evolutionFounded);
-                await interaction.reply({
-                    content: `Hiro évolue en ${evolutionFounded.name} !`
+                return await interaction.reply({
+                    content: `${specieFounded.name} évolue en ${evolutionFounded.name} !`
                 });
             } else await interaction.reply({
                 content: `Il n'existe pas de pokémon du nom de ${evolution}`,
@@ -90,7 +90,7 @@ module.exports = {
             })
 
             
-        } else await interaction.reply({
+        } else return await interaction.reply({
             content: 'En travaux',
             ephemeral: true
         });

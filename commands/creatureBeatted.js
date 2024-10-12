@@ -14,7 +14,7 @@ module.exports = {
         .setDescription(`Un pokémon a été vaincu.`)
         .addStringOption(option => 
             option.setName('trainer')
-                .setDescription('Dresseur qui a vaincu le pokémon')
+                .setDescription('Dresseur associé')
                 .setRequired(true)
         )
         .addStringOption(option => 
@@ -40,7 +40,7 @@ module.exports = {
 
         const userId = interaction.user.id;
         const trainerFounded = await Pokemon_Trainer.findOne({
-            where: { name: trainer, userId},
+            where: { name: trainer, userId },
             include: [ Pokemon_Trainer.Team ]
         });
         if (!trainerFounded) {
@@ -74,10 +74,12 @@ module.exports = {
                                 .setCustomId('winners')
                                 .setPlaceholder('No winner?')
                             	.setMinValues(1)
+                                .setMaxValues(options.length)
                                 .addOptions(options)
                         )
 
         if (returned) {
+            Stock.trainerSaved[userId] = [trainerFounded, ''];
             Stock.creatureSaved[trainerFounded.id] = returned;
             return await interaction.reply({
                 content: `Un ${specie.split('/')[0]} a été vaincu. Qui l'a battu ?`,

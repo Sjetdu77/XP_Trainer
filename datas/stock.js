@@ -1,6 +1,7 @@
 class Stock {
     constructor() {
         this.creatureSaved = {};
+        this.trainerSaved = {};
     }
 }
 

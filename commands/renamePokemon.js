@@ -11,7 +11,7 @@ module.exports = {
         .setDescription(`Permet de renommer un pokémon capturé.`)
         .addStringOption(option => 
             option.setName('trainer')
-                .setDescription('Dresseur qui possède le pokémon')
+                .setDescription('Dresseur associé')
                 .setRequired(true)
         )
         .addStringOption(option => 
