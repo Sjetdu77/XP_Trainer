@@ -12,9 +12,8 @@ const { Pokemon_Trainer, Pokemon_Creature } = require('../classes');
  */
 async function setDatas(embed, table) {
     for (const creature of table) {
-        const specie = await creature.getSpecieName();
         const rate = await creature.getXPRate() * 100;
-        const name = `${creature.nickname ? creature.nickname : specie.name}`;
+        const name = `${creature.nickname ? creature.nickname : await creature.getSpecieName()}`;
         let value = `${await creature.getSpecieName()} niveau ${creature.level}\n`;
         value += `Bonheur : ${creature.happiness}\n`;
         value += '`XP: [';
