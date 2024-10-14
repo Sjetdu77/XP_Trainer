@@ -5,6 +5,7 @@ const {
 } = require('discord.js');
 const { Stock } = require('../datas/stock');
 const { Pokemon_Creature } = require('../classes');
+const { getName } = require('../datas/generalFunctions');
 
 /**
  * 
@@ -19,16 +20,17 @@ async function deposit_response(interaction) {
         include: [ Pokemon_Creature.Specie ]
     });
 
-    let team = [];
+    let team = [], teamSaved = {};
 
     for (const creature of allCreaturesTeam) {
-        const specie = await creature.getSpecie();
+        teamSaved[`${creature.id}`] = creature;
         team.push({
-            label: creature.nickname ? creature.nickname : specie.name,
+            label: await getName(creature),
             description: `${await creature.getSpecieName()} niveau ${creature.level}`,
             value: `${creature.id}`
         })
     }
+    Stock.teamSaved[trainer.id] = teamSaved;
 
     const choices = new ActionRowBuilder()
                     .addComponents(

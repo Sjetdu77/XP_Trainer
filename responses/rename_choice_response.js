@@ -2,7 +2,6 @@ const {
     StringSelectMenuInteraction
 } = require('discord.js');
 const { Stock } = require('../datas/stock');
-const { Pokemon_Creature } = require('../classes');
 
 /**
  * 
@@ -13,14 +12,7 @@ async function rename_choice_response(interaction) {
     const userId = interaction.user.id;
     const selected = interaction.values[0];
     const trainer = Stock.trainerSaved[userId];
-    const creatures = await trainer.getCreatures({
-        where: {
-            id: parseInt(selected),
-            place: 'team'
-        },
-        include: [ Pokemon_Creature.Specie ]
-    });
-    const creature = creatures[0];
+    const creature = Stock.teamSaved[trainer.id][selected];
 
     await interaction.update({
         content: `Quel est le nouveau nom du ${await creature.getSpecieName()} ? (Ne tapez que le nom)`,

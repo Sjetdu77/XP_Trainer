@@ -1,8 +1,12 @@
 const {
     SlashCommandBuilder,
-    ChatInputCommandInteraction
+    ChatInputCommandInteraction,
+    ActionRowBuilder,
+    StringSelectMenuBuilder
 } = require('discord.js');
-const { Pokemon_Trainer } = require('../classes');
+const { Pokemon_Trainer, Pokemon_Creature } = require('../classes');
+const { getName } = require('../datas/generalFunctions');
+const { Stock } = require('../datas/stock');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -24,15 +28,46 @@ module.exports = {
         const trainerFounded = await Pokemon_Trainer.findOne({
             where: { name: trainer, userId }
         });
-        if (!trainerFounded) {
+        if (!trainerFounded)
             return await interaction.reply({
-                content: `${trainer} n'est pas un Dresseur.`,
+                content: `Désolé, mais ${trainer} n'est pas un Dresseur.`,
                 ephemeral: true
             });
-        }
 
-        
+        const creatures = await trainerFounded.getCreatures({
+            where: { place: 'team' },
+            include: [ Pokemon_Creature.Specie ]
+        });
 
-        //let evolutionFounded = await specieFounded.getEvolutions({ where: { name: evolution } });
+        let options = [], teamSaved = {};
+        for (const creature of creatures)
+            if (await creature.canEvolute()) {
+                teamSaved[`${creature.id}`] = creature;
+                options.push({
+                    label: await getName(creature),
+                    description: `${await creature.getSpecieName()} niveau ${creature.level}`,
+                    value: `${creature.id}`
+                })
+            }
+
+        Stock.trainerSaved[userId] = trainerFounded;
+        Stock.teamSaved[trainerFounded.id] = teamSaved;
+
+        if (options.length === 0) return await interaction.reply({
+            content: `Désolé, mais aucun pokémon ne peut évoluer.`,
+            ephemeral: true
+        });
+        else return await interaction.reply({
+            content: `Quel pokémon a le droit d'évoluer`,
+            components: [
+                new ActionRowBuilder()
+                        .addComponents(
+                            new StringSelectMenuBuilder()
+                                .setCustomId('evolute')
+                                .setPlaceholder('Qui à évoluer ?')
+                                .addOptions(options)
+                        )
+            ]
+        });   
     }
 }

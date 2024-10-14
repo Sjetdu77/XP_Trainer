@@ -1,7 +1,21 @@
 const { DataTypes, Model } = require('sequelize');
 const { dataBaseTable } = require('../datas/table_models.js');
+const Pokemon_Creature = require('./Pokemon_Creature.js');
+const Specie_Evolution = require('./Specie_Evolution.js');
+
+var origin = {
+    'A': "d'Alola",
+    'G': "de Galar",
+    'H': "de Hisui",
+    'P': "de Paldea"
+}
 
 class Pokemon_Specie extends Model {
+    getSpecieName() {
+        const [_, o] = this.id.split('-');
+        return `${this.name}${o ? ` ${origin[o]}` : ''}`;
+    }
+
     /**
      * 
      * @param {number} level 
@@ -33,6 +47,41 @@ class Pokemon_Specie extends Model {
 
         return xpMax;
     }
+
+    /**
+     * 
+     * @returns {Specie_Evolution[]}
+     */
+    getEvolutions() {
+        let evolutions = [];
+        for (const evolution of this.evolutions) evolutions.push(evolution.specie_evolution);
+        return evolutions;
+    }
+
+    /**
+     * 
+     * @param {Pokemon_Creature} creature 
+     * @returns 
+     */
+    getGoodEvolutions(creature) {
+        const evolutions = this.getEvolutions();
+        let goodEvolutions = [];
+        for (const evolution of evolutions) {
+            const conditions = evolution.conditions;
+            if (conditions === '' || (conditions === 'F' && creature.happiness >= 160)
+                    || (conditions.startsWith('L.') && creature.level >= parseInt(conditions.slice(2))))
+            goodEvolutions.push(evolution);
+        }
+
+        return goodEvolutions;
+    }
+
+    /**
+     * 
+     * @param {Pokemon_Creature} creature 
+     * @returns 
+     */
+    canEvolute = (creature) => this.getGoodEvolutions(creature).length > 0;
 }
 
 Pokemon_Specie.init({

@@ -3,6 +3,7 @@ const {
 } = require('discord.js');
 const { Stock } = require('../datas/stock');
 const { Pokemon_Creature } = require('../classes');
+const { getName } = require('../datas/generalFunctions');
 
 /**
  * 
@@ -29,7 +30,7 @@ async function withdraw_response(interaction) {
 
     for (const creature of allCreaturesPC) {
         const specie = await creature.getSpecie();
-        const name = `${creature.nickname ? creature.nickname : specie.name}`;
+        const name = await getName(creature);
         if (!copies[name]) copies[name] = [];
         copies[name].push(creature);
         association[creature.id] = specie;

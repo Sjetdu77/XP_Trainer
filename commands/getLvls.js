@@ -37,7 +37,6 @@ module.exports = {
                 ephemeral: true
             });
 
-        Stock.trainerSaved[userId] = trainerFounded;
         Stock.numberSaved[trainerFounded.id] = levels;
 
         return await interaction.reply({

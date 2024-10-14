@@ -1,6 +1,7 @@
 const { ChatInputCommandInteraction } = require('discord.js');
 const { Pokemon_Trainer, Pokemon_Creature, Pokemon_Specie } = require('../classes');
 const { Op } = require('sequelize');
+const { Stock } = require('./stock');
 
 var originToCode = {
     "Alola": 'A',
@@ -50,6 +51,8 @@ async function getSpecie(specieOrigin, starter=false) {
  * @returns 
  */
 async function createCreature(interaction, trainer, specieOrigin, level, otherValues={}, starter=false) {
+    if (level > 100 || level < 0) return null;
+    
     let [specieName, origin] = specieOrigin.split('/');
     specieName = specieName.trim();
 
@@ -112,21 +115,34 @@ async function setAllOptions(userId, trainerName, place='team') {
     if (creatures.length === 0 && place === 'team')
         return [null, `Désolé, mais ${trainer} n'a pas de pokémon !`];
 
-    let options = [];
+    let options = [], teamSaved = {};
     for (const creature of creatures) {
-        const specie = await creature.getSpecie();
+        teamSaved[`${creature.id}`] = creature;
         options.push({
-            label: creature.nickname ? creature.nickname : specie.name,
+            label: await getName(creature),
             description: `${await creature.getSpecieName()} niveau ${creature.level}`,
             value: `${creature.id}`
         })
     }
+    Stock.trainerSaved[userId] = trainer;
+    Stock.teamSaved[trainer.id] = teamSaved;
 
     return [trainer, options];
+}
+
+/**
+ * 
+ * @param {Pokemon_Creature} creature 
+ * @returns {Promise<string>}
+ */
+async function getName(creature) {
+    const specie = await creature.getSpecie();
+    return creature.nickname ? creature.nickname : specie.name;
 }
 
 module.exports = {
     createCreature,
     getSpecie,
-    setAllOptions
+    setAllOptions,
+    getName
 }

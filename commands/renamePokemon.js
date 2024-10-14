@@ -4,7 +4,6 @@ const {
     ActionRowBuilder,
     StringSelectMenuBuilder
 } = require('discord.js');
-const { Stock } = require('../datas/stock');
 const { setAllOptions } = require('../datas/generalFunctions');
 
 module.exports = {
@@ -24,14 +23,12 @@ module.exports = {
     async execute(interaction) {
         const trainer = interaction.options.getString('trainer').trim();
         const userId = interaction.user.id;
-        const [trainerFounded, options] = await setAllOptions(userId, trainer);
+        const [_, options] = await setAllOptions(userId, trainer);
         if (typeof options === 'string')
             return await interaction.reply({
                 content: options,
                 ephemeral: true
             });
-
-        Stock.trainerSaved[userId] = trainerFounded;
 
         return await interaction.reply({
             content: `Qui est-ce que vous voulez renommer ?`,

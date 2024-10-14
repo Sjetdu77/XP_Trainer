@@ -4,7 +4,6 @@ const {
     ActionRowBuilder,
     StringSelectMenuBuilder
 } = require('discord.js');
-const { Stock } = require('../datas/stock');
 const { setAllOptions } = require('../datas/generalFunctions');
 
 module.exports = {
@@ -40,7 +39,6 @@ module.exports = {
                 ephemeral: true
             });
 
-        Stock.trainerSaved[userId] = trainerFounded;
         
         if (allTeams.length < 6 && allPC.length > 0)
             options.push({

@@ -1,18 +1,11 @@
 const { DataTypes, Model } = require('sequelize');
 const { dataBaseTable } = require('../datas/table_models.js');
-
-var origin = {
-    'A': "d'Alola",
-    'G': "de Galar",
-    'H': "de Hisui",
-    'P': "de Paldea"
-}
+const Pokemon_Specie = require('./Pokemon_Specie.js');
 
 class Pokemon_Creature extends Model {
     async getSpecieName() {
         const specie = await this.getSpecie();
-        const [_, o] = specie.id.split('-');
-        return `${specie.name} ${o ? origin[o] : ''}`;
+        return specie.getSpecieName();
     }
 
     /**
@@ -23,16 +16,17 @@ class Pokemon_Creature extends Model {
      */
     async gainXPViaFoe(foe, participate = false) {
         const trainer = await this.getTrainer();
-        const foesDatas = await foe.getDatasForXP();
+        const specie = await this.getSpecie({ include: [Pokemon_Specie.Evolution] });
+        const foesSpecie = await foe.getSpecie();
         const trainerDatas = await trainer.getDatasFromTrainer();
 
-        let firstPart = foesDatas.specie.baseXP * foe.level / 5;
+        let firstPart = foesSpecie.baseXP * foe.level / 5;
         if (!participate) firstPart /= 2;
         
         let experience = firstPart * ((2 * foe.level + 10) / (foe.level + this.level + 10))**2.5 + 1;
         if (this.exchanged) experience *= 1.5;
         if (trainerDatas.getLuckyEgg) experience *= 1.5;
-        if (foesDatas.evolutions.length > 0) experience *= 1.5;
+        if (await this.canEvolute()) experience *= 1.5;
         if (this.happiness >= 200) experience *= 1.2;
 
         experience = Math.round(experience);
@@ -92,12 +86,13 @@ class Pokemon_Creature extends Model {
      */
     async minusXPViaFoe(foe) {
         const trainer = await this.getTrainer();
-        const foesDatas = await foe.getDatasForXP();
+        const specie = await this.getSpecie({ include: [Pokemon_Specie.Evolution] });
+        const foesSpecie = await foe.getSpecie();
         const trainerDatas = await trainer.getDatasFromTrainer();
         
-        let experience1 = ((foesDatas.specie.baseXP * foe.level / 5)
+        let experience1 = ((foesSpecie.baseXP * foe.level / 5)
                 * ((2 * foe.level + 10) / (foe.level + this.level + 10))**2.5 + 1);
-        let experience2 = ((foesDatas.specie.baseXP * foe.level / 10)
+        let experience2 = ((foesSpecie.baseXP * foe.level / 10)
                 * ((2 * foe.level + 10) / (foe.level + this.level + 10))**2.5 + 1);
         
         if (this.exchanged) {
@@ -108,7 +103,7 @@ class Pokemon_Creature extends Model {
             experience1 *= 1.5;
             experience2 *= 1.5;
         }
-        if (foesDatas.evolutions.length > 0) {
+        if (await this.canEvolute()) {
             experience1 *= 1.5;
             experience2 *= 1.5;
         }
@@ -144,6 +139,10 @@ class Pokemon_Creature extends Model {
         return lvl;
     }
 
+    /**
+     * 
+     * @returns {Promise<number>}
+     */
     async getMinXP() {
         const specie = await this.getSpecie();
         return specie.calculateLvlXP(this.level - 1);
@@ -154,23 +153,53 @@ class Pokemon_Creature extends Model {
         this.save();
     }
 
+    /**
+     * 
+     * @returns {Promise<number>}
+     */
     async getMaxXP() {
         const specie = await this.getSpecie();
         return specie.calculateLvlXP(this.level);
     }
 
-    async getDatasForXP() {
-        const specie = await this.getSpecie();
-        const evolutions = await specie.getEvolutions();
-        return { specie, evolutions }
-    }
-
     getXPRate = async () =>
         (this.actualXP - await this.getMinXP()) / (await this.getMaxXP() - await this.getMinXP());
 
-    async evolutionsList() {
-        const specie = await this.getSpecie();
-        return specie.evolutionsList(this);
+    /**
+     * 
+     * @returns {Promise<boolean>}
+     */
+    async canEvolute() {
+        const specie = await this.getSpecie({ include: [Pokemon_Specie.Evolution] });
+        return specie.canEvolute(this);
+    }
+
+    /**
+     * 
+     * @returns {Promise<Specie_Evolution[]>}
+     */
+    async getEvolutions() {
+        const specie = await this.getSpecie({ include: [Pokemon_Specie.Evolution] });
+        return specie.getEvolutions(this);
+    }
+
+    /**
+     * 
+     * @returns {Promise<Specie_Evolution[]>}
+     */
+    async getGoodEvolutions() {
+        const specie = await this.getSpecie({ include: [Pokemon_Specie.Evolution] });
+        return specie.getGoodEvolutions(this);
+    }
+
+    /**
+     * 
+     * @param {Specie_Evolution} specie 
+     */
+    async evolution(specie) {
+        this.specieId = specie.evolutionId;
+        this.save();
+        return await Pokemon_Specie.findOne({ where: { id: specie.evolutionId } });
     }
 }
 

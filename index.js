@@ -16,7 +16,9 @@ const {
 	level_response,
 	experience_response,
 	rename_choice_response,
-	rename_type_response
+	rename_type_response,
+	evolute_response,
+	evolution_response
 } = require('./responses.js');
 const { token } = require('./config.json');
 const { synchronize } = require('./classes.js');
@@ -80,6 +82,8 @@ client.on(Events.InteractionCreate, async interaction => {
 			case 'levels': return await level_response(interaction);
 			case 'experience': return await experience_response(interaction);
 			case 'rename_choice': return await rename_choice_response(interaction);
+			case 'evolute': return await evolute_response(interaction);
+			case 'evolution': return await evolution_response(interaction);
 			case 'place_choices':
 				if (interaction.values[0] == 'withdraw') await withdraw_response(interaction);
 				else if (interaction.values[0] == 'deposit') await deposit_response(interaction);

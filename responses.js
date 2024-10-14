@@ -8,6 +8,8 @@ const level_response = require('./responses/level_response.js');
 const experience_response = require('./responses/experience_response.js');
 const rename_choice_response = require('./responses/rename_choice_response.js');
 const rename_type_response = require('./responses/rename_type_response.js');
+const evolute_response = require('./responses/evolute_response.js');
+const evolution_response = require('./responses/evolution_response.js');
 
 module.exports = {
     winners_response,
@@ -19,5 +21,7 @@ module.exports = {
     level_response,
     experience_response,
     rename_choice_response,
-    rename_type_response
+    rename_type_response,
+    evolute_response,
+    evolution_response
 }

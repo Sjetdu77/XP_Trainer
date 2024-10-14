@@ -50,7 +50,6 @@ module.exports = {
                 ephemeral: true
             });
 
-        Stock.trainerSaved[userId] = trainerFounded;
         Stock.creatureSaved[trainerFounded.id] = returned;
 
         return await interaction.reply({

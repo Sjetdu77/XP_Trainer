@@ -3,6 +3,7 @@ const {
     ChatInputCommandInteraction
 } = require('discord.js');
 const { Pokemon_Trainer, Pokemon_Creature } = require('../classes');
+const { getName } = require('../datas/generalFunctions');
 
 /**
  * 
@@ -13,7 +14,7 @@ const { Pokemon_Trainer, Pokemon_Creature } = require('../classes');
 async function setDatas(embed, table) {
     for (const creature of table) {
         const rate = await creature.getXPRate() * 100;
-        const name = `${creature.nickname ? creature.nickname : await creature.getSpecieName()}`;
+        const name = await getName(creature);
         let value = `${await creature.getSpecieName()} niveau ${creature.level}\n`;
         value += `Bonheur : ${creature.happiness}\n`;
         value += '`XP: [';

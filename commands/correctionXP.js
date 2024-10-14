@@ -49,8 +49,7 @@ module.exports = {
                 content: options,
                 ephemeral: true
             });
-        
-        Stock.trainerSaved[userId] = trainerFounded;
+
         Stock.creatureSaved[trainerFounded.id] = returned;
         return await interaction.reply({
             content: `Quel pokémon est-ce qu'on va retirer l'expérience ?`,
