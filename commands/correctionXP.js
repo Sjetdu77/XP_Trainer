@@ -4,21 +4,26 @@ const {
     ActionRowBuilder,
     StringSelectMenuBuilder
 } = require('discord.js');
-const { setAllOptions } = require('../datas/generalFunctions');
 const { Stock } = require('../datas/stock');
+const { createCreature, setAllOptions } = require('../datas/generalFunctions');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('get_lvl')
-        .setDescription(`Permet de gagner des niveaux.`)
+        .setName('correction_exp')
+        .setDescription(`Permet de retirer l'expérience gagné par erreur.`)
         .addStringOption(option => 
             option.setName('trainer')
                 .setDescription('Dresseur associé')
                 .setRequired(true)
         )
+        .addStringOption(option => 
+            option.setName('foe')
+                .setDescription('Le Pokémon adverse battu')
+                .setRequired(true)
+        )
         .addIntegerOption(option => 
-            option.setName('lvls')
-                .setDescription(`Niveaux gagnés`)
+            option.setName('level')
+                .setDescription(`Niveau du Pokémon adverse`)
                 .setRequired(true)
         ),
 
@@ -28,7 +33,15 @@ module.exports = {
      */
     async execute(interaction) {
         const trainer = interaction.options.getString('trainer').trim();
-        const levels = interaction.options.getInteger('lvls');
+        const foe = interaction.options.getString('foe').trim();
+        const level = interaction.options.getInteger('level');
+        const returned = await createCreature(interaction, null, foe, level);
+        if (!returned)
+            return await interaction.reply({
+                content: `Désolé, le pokémon n'existe pas.`,
+                ephemeral: true
+            });
+
         const userId = interaction.user.id;
         const [trainerFounded, options] = await setAllOptions(userId, trainer);
         if (typeof options === 'string')
@@ -36,18 +49,19 @@ module.exports = {
                 content: options,
                 ephemeral: true
             });
-
+        
         Stock.trainerSaved[userId] = trainerFounded;
-        Stock.numberSaved[trainerFounded.id] = levels;
-
+        Stock.creatureSaved[trainerFounded.id] = returned;
         return await interaction.reply({
-            content: `Quel pokémon a le droit à ${levels} niveau${levels > 1 ? 'x' : ''} de plus ?`,
+            content: `Quel pokémon est-ce qu'on va retirer l'expérience ?`,
             components: [
                 new ActionRowBuilder()
                         .addComponents(
                             new StringSelectMenuBuilder()
-                                .setCustomId('levels')
-                                .setPlaceholder('Qui à entraîner ?')
+                                .setCustomId('correction')
+                                .setPlaceholder('Qui à corriger ?')
+                                .setMinValues(1)
+                                .setMaxValues(options.length - 1)
                                 .addOptions(options)
                         )
             ]

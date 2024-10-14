@@ -1,8 +1,20 @@
 const { DataTypes, Model } = require('sequelize');
-const { dataBaseTable } = require('./table_models.js');
+const { dataBaseTable } = require('../datas/table_models.js');
 
+var origin = {
+    'A': "d'Alola",
+    'G': "de Galar",
+    'H': "de Hisui",
+    'P': "de Paldea"
+}
 
 class Pokemon_Creature extends Model {
+    async getSpecieName() {
+        const specie = await this.getSpecie();
+        const [_, o] = specie.id.split('-');
+        return `${specie.name} ${o ? origin[o] : ''}`;
+    }
+
     /**
      * 
      * @param {Pokemon_Creature} foe 
@@ -30,10 +42,13 @@ class Pokemon_Creature extends Model {
         return [experience, lvlGained];
     }
 
+    /**
+     * 
+     * @param {number} exp 
+     * @returns 
+     */
     async gainXP(exp) {
-        if (!this.actualXP) {
-            this.actualXP = 0;
-        }
+        if (!this.actualXP) this.actualXP = 0;
         this.actualXP += exp;
         let numLevelUp = 0, maxXP = await this.getMaxXP();
 
@@ -41,11 +56,8 @@ class Pokemon_Creature extends Model {
             numLevelUp++;
             this.level++;
 
-            if (this.happiness < 100) {
-                this.happiness += 3;
-            } else if (this.happiness < 160) {
-                this.happiness += 2;
-            }
+            if (this.happiness < 100) this.happiness += 3;
+            else if (this.happiness < 160) this.happiness += 2;
             
             maxXP = await this.getMaxXP();
         }
@@ -56,9 +68,14 @@ class Pokemon_Creature extends Model {
         return numLevelUp;
     }
 
-    async minusXP(xp) {
+    /**
+     * 
+     * @param {number} exp 
+     * @returns 
+     */
+    async minusXP(exp) {
         let lvlLost = 0
-        this.actualXP -= xp;
+        this.actualXP -= exp;
         while (this.actualXP < await this.getMinXP()) {
             this.level--;
             lvlLost++;
@@ -68,33 +85,57 @@ class Pokemon_Creature extends Model {
         return lvlLost;
     }
 
+    /**
+     * 
+     * @param {Pokemon_Creature} foe 
+     * @returns 
+     */
     async minusXPViaFoe(foe) {
         const trainer = await this.getTrainer();
         const foesDatas = await foe.getDatasForXP();
         const trainerDatas = await trainer.getDatasFromTrainer();
-
-        let firstPart = foesDatas.specie.baseXP * foe.level / 5;
         
-        let experience = firstPart * ((2 * foe.level + 10) / (foe.level + this.level + 10))**2.5 + 1;
-        if (this.exchanged) experience *= 1.5;
-        if (trainerDatas.getLuckyEgg) experience *= 1.5;
-        if (foesDatas.evolutions.length > 0) experience *= 1.5;
-        if (this.happiness >= 200) experience *= 1.2;
+        let experience1 = ((foesDatas.specie.baseXP * foe.level / 5)
+                * ((2 * foe.level + 10) / (foe.level + this.level + 10))**2.5 + 1);
+        let experience2 = ((foesDatas.specie.baseXP * foe.level / 10)
+                * ((2 * foe.level + 10) / (foe.level + this.level + 10))**2.5 + 1);
+        
+        if (this.exchanged) {
+            experience1 *= 1.5;
+            experience2 *= 1.5;
+        }
+        if (trainerDatas.getLuckyEgg) {
+            experience1 *= 1.5;
+            experience2 *= 1.5;
+        }
+        if (foesDatas.evolutions.length > 0) {
+            experience1 *= 1.5;
+            experience2 *= 1.5;
+        }
+        if (this.happiness >= 200) {
+            experience1 *= 1.2;
+            experience2 *= 1.2;
+        }
 
-        experience = Math.round(experience / 2);
+        experience1 = Math.round(experience1);
+        experience2 = Math.round(experience2);
 
-        const lvlLost = this.minusXP(experience);
-        return [experience, lvlLost];
+        let total = experience1 - experience2;
+
+        const lvlLost = await this.minusXP(total);
+        return [total, lvlLost];
     }
 
+    /**
+     * 
+     * @param {number} lvl 
+     * @returns 
+     */
     async gainLevels(lvl) {
         for (let l = 0 ; l < lvl ; l++) {
             this.level++;
-            if (this.happiness < 100) {
-                this.happiness += 3;
-            } else if (this.happiness < 160) {
-                this.happiness += 2;
-            }
+            if (this.happiness < 100) this.happiness += 3;    
+            else if (this.happiness < 160) this.happiness += 2;
         }
 
         this.actualXP = await this.getMinXP();
@@ -124,8 +165,12 @@ class Pokemon_Creature extends Model {
         return { specie, evolutions }
     }
 
-    async getXPRate() {
-        return (this.actualXP - await this.getMinXP()) / await this.getMaxXP();
+    getXPRate = async () =>
+        (this.actualXP - await this.getMinXP()) / (await this.getMaxXP() - await this.getMinXP());
+
+    async evolutionsList() {
+        const specie = await this.getSpecie();
+        return specie.evolutionsList(this);
     }
 }
 
@@ -158,13 +203,11 @@ Pokemon_Creature.init({
     place: {
         type: DataTypes.STRING,
         defaultValue: 'wild'
-    },
-    origin: DataTypes.STRING
+    }
 }, {
     sequelize: dataBaseTable,
-    modelName: 'creature'
+    modelName: 'creature',
+    timestamps: false
 });
 
-module.exports = {
-    Pokemon_Creature
-}
+module.exports = Pokemon_Creature;

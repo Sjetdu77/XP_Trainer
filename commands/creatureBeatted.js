@@ -4,8 +4,7 @@ const {
     ActionRowBuilder,
     StringSelectMenuBuilder
 } = require('discord.js');
-const { Pokemon_Trainer, Pokemon_Creature } = require('../classes');
-const { createCreature } = require('../datas/generalFunctions');
+const { createCreature, setAllOptions } = require('../datas/generalFunctions');
 const { Stock } = require('../datas/stock');
 
 module.exports = {
@@ -33,58 +32,40 @@ module.exports = {
      * @param {ChatInputCommandInteraction} interaction 
      */
     async execute(interaction) {
-        const trainer = interaction.options.getString('trainer');
-        const specie = interaction.options.getString('specie');
+        const trainer = interaction.options.getString('trainer').trim();
+        const specie = interaction.options.getString('specie').trim();
         const level = interaction.options.getInteger('level');
         const returned = await createCreature(interaction, null, specie, level);
+        if (!returned)
+            return await interaction.reply({
+                content: `Désolé, le pokémon n'existe pas.`,
+                ephemeral: true
+            });
 
         const userId = interaction.user.id;
-        const trainerFounded = await Pokemon_Trainer.findOne({
-            where: { name: trainer, userId },
-            include: [ Pokemon_Trainer.Team ]
+        const [trainerFounded, options] = await setAllOptions(userId, trainer);
+        if (typeof options === 'string')
+            return await interaction.reply({
+                content: options,
+                ephemeral: true
+            });
+
+        Stock.trainerSaved[userId] = trainerFounded;
+        Stock.creatureSaved[trainerFounded.id] = returned;
+
+        return await interaction.reply({
+            content: `Un ${await returned.getSpecieName()} a été vaincu. Qui l'a battu ?`,
+            components: [
+                new ActionRowBuilder()
+                    .addComponents(
+                        new StringSelectMenuBuilder()
+                            .setCustomId('winners')
+                            .setPlaceholder('Pas de vainqueur ?')
+                            .setMinValues(1)
+                            .setMaxValues(options.length)
+                            .addOptions(options)
+                    )
+            ]
         });
-        if (!trainerFounded) {
-            return await interaction.reply({
-                content: `${trainer} n'est pas un Dresseur.`,
-                ephemeral: true
-            });
-        }
-
-        const creatures = await trainerFounded.getCreatures({ where: { place: 'team' }, include: [ Pokemon_Creature.Specie ] });
-        if (creatures.length === 0) {
-            return await interaction.reply({
-                content: `Mais ${trainer} n'a pas de pokémon !`,
-                ephemeral: true
-            });
-        }
-
-        let options = [];
-        for (const creature of creatures) {
-            const specie = await creature.getSpecie();
-            options.push({
-                label: creature.nickname ? creature.nickname : specie.name,
-                description: `${specie.name} niveau ${creature.level}`,
-                value: `${creature.id}`
-            })
-        }
-
-        const winners = new ActionRowBuilder()
-                        .addComponents(
-                            new StringSelectMenuBuilder()
-                                .setCustomId('winners')
-                                .setPlaceholder('No winner?')
-                            	.setMinValues(1)
-                                .setMaxValues(options.length)
-                                .addOptions(options)
-                        )
-
-        if (returned) {
-            Stock.trainerSaved[userId] = [trainerFounded, ''];
-            Stock.creatureSaved[trainerFounded.id] = returned;
-            return await interaction.reply({
-                content: `Un ${specie.split('/')[0]} a été vaincu. Qui l'a battu ?`,
-                components: [winners]
-            });
-        }
     }
 }

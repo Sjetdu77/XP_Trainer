@@ -1,6 +1,6 @@
 {
   "name": "xp-trainer",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "csv-parser": "^3.0.0",
     "csv-stringify": "^6.5.1",
     "discord.js": "^14.16.2",
-    "jsdom": "^25.0.0",
+    "jsdom": "^25.0.1",
     "lodash": "^4.17.21",
     "needle": "^3.3.1",
     "sequelize": "^6.37.3",

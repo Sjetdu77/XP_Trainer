@@ -34,10 +34,11 @@ module.exports = {
      * @param {ChatInputCommandInteraction} interaction 
      */
     async execute(interaction) {
-        const trainer = interaction.options.getString('trainer');
-        const specie = interaction.options.getString('specie');
+        const trainer = interaction.options.getString('trainer').trim();
+        const specie = interaction.options.getString('specie').trim();
         const level = interaction.options.getInteger('level');
-        const nickname = interaction.options.getString('nickname');
+        let nickname = interaction.options.getString('nickname');
+        if (nickname) nickname = nickname.trim();
 
         const userId = interaction.user.id;
         const trainerFounded = await Pokemon_Trainer.findOne({
@@ -64,10 +65,14 @@ module.exports = {
             nickname, place: numCreatures.length < 6 ? 'team' : 'computer'
         });
 
-        if (returned) {
+        if (returned)
             return await interaction.reply({
                 content: `Félicitations pour votre nouveau pokémon, ${trainer} !`
             });
-        }
+        else
+            return await interaction.reply({
+                content: `Désolé, le pokémon n'existe pas.`,
+                ephemeral: true
+            });
     }
 }

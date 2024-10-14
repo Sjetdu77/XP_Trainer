@@ -1,7 +1,11 @@
 config.json
-fill.js
+
+fill_conditions.js
 pokebase.sqlite
+pokebase - Backup.sqlite
 accessToLists.js
 deploy-commands.js
+
 .env
 node_modules
+second

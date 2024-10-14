@@ -1,5 +1,5 @@
 const { DataTypes, Model } = require('sequelize');
-const { dataBaseTable } = require('./table_models.js');
+const { dataBaseTable } = require('../datas/table_models.js');
 
 class Pokemon_Trainer extends Model {
     getDatasFromTrainer() {
@@ -18,10 +18,6 @@ Pokemon_Trainer.init({
     },
     name: DataTypes.STRING,
     userId: DataTypes.STRING,
-    avatar: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
     getLuckyEgg: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
@@ -32,9 +28,8 @@ Pokemon_Trainer.init({
     }
 }, {
     sequelize: dataBaseTable,
-    modelName: 'trainer'
+    modelName: 'trainer',
+    timestamps: false
 });
 
-module.exports = {
-    Pokemon_Trainer
-}
+module.exports = Pokemon_Trainer;

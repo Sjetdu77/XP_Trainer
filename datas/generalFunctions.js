@@ -1,19 +1,43 @@
 const { ChatInputCommandInteraction } = require('discord.js');
-const { Pokemon_Trainer, Pokemon_Specie, Pokemon_Creature } = require('../classes');
-const { Op } = require("sequelize");
+const { Pokemon_Trainer, Pokemon_Creature, Pokemon_Specie } = require('../classes');
+const { Op } = require('sequelize');
 
-let regions = [
-    'Kanto',
-    'Johto',
-    'Hoenn',
-    'Sinnoh',
-    'Unys',
-    'Kalos',
-    'Alola',
-    'Galar',
-    'Hisui',
-    'Paldea'
-]
+var originToCode = {
+    "Alola": 'A',
+    "Galar": 'G',
+    "Hisui": 'H',
+    "Paldea": 'P'
+}
+
+/**
+ * 
+ * @param {string} specieOrigin 
+ * @param {boolean} starter 
+ * @returns 
+ */
+async function getSpecie(specieOrigin, starter=false) {
+    let [specieName, origin] = specieOrigin.split('/');
+    specieName = specieName.trim();
+
+    let where = {
+        [Op.or]: [
+            { name: specieName },
+            { english_name: specieName }
+        ]
+    };
+    if (starter) where.starter = true;
+    if (origin) where.id = {
+        [Op.endsWith]: `-${originToCode[origin.trim()]}`
+    }
+
+    return await Pokemon_Specie.findOne({
+        where,
+        include: [
+            Pokemon_Specie.Creatures,
+            Pokemon_Specie.Evolution
+        ]
+    });
+}
 
 /**
  * 
@@ -25,21 +49,22 @@ let regions = [
  * @param {boolean} starterNeeded 
  * @returns 
  */
-async function createCreature(interaction, trainer, specieOrigin, level, otherValues={}, starterNeeded=false) {
-    let [ specie, origin ] = specieOrigin.split('/');
-    specie = specie.trim();
+async function createCreature(interaction, trainer, specieOrigin, level, otherValues={}, starter=false) {
+    let [specieName, origin] = specieOrigin.split('/');
+    specieName = specieName.trim();
 
     let where = {
         [Op.or]: [
-            { english_name: specie },
-            { name: specie }
-        ],
+            { name: specieName },
+            { english_name: specieName }
+        ]
     };
-    if (starterNeeded) {
-        where.starter = true;
+    if (starter) where.starter = true;
+    if (origin) where.id = {
+        [Op.endsWith]: `-${originToCode[origin.trim()]}`
     }
 
-    const specieFounded = await Pokemon_Specie.findOne({ where });
+    const specieFounded = await getSpecie(specieOrigin, starter);
     if (!specieFounded) {
         await interaction.reply({
             content: `Il n'y a pas de Pokémon du nom de ${specie}.`,
@@ -49,52 +74,59 @@ async function createCreature(interaction, trainer, specieOrigin, level, otherVa
         return null;
     }
 
-    if (origin) {
-        origin = origin.trim();
-    }
-
-    if (!(origin && regions.includes(origin))) {
-        let intId = parseInt(specieFounded.id);
-
-        if (intId <= 151) {
-            origin = 'Kanto';
-        } else if (intId <= 251) {
-            origin = 'Johto';
-        } else if (intId <= 386) {
-            origin = 'Hoenn';
-        } else if (intId <= 493) {
-            origin = 'Sinnoh';
-        } else if (intId <= 649) {
-            origin = 'Unys';
-        } else if (intId <= 721) {
-            origin = 'Kalos';
-        } else if (intId <= 809) {
-            origin = 'Alola';
-        } else if (intId <= 898) {
-            origin = 'Galar';
-        } else if (intId <= 905) {
-            origin = 'Hisui';
-        } else {
-            origin = 'Paldea'
-        }
-    }
-
     let data = {
         ...{
             level,
             actualXP: specieFounded.calculateLvlXP(level - 1),
             specieId: specieFounded.id,
-            origin: origin
         },
         ...otherValues
     }
-    if (trainer) {
-        data.team = trainer.id;
-    }
+    if (trainer) data.team = trainer.id;
     
     return await Pokemon_Creature.create(data);
 }
 
+/**
+ * 
+ * @param {string} userId 
+ * @param {string} trainerName 
+ * @param {string} place 
+ * @returns {Promise<[Pokemon_Trainer | null, string | {
+ *      label: string;
+ *      description: string;
+ *      value: string;
+ * }[]]>}
+ */
+async function setAllOptions(userId, trainerName, place='team') {
+    const trainer = await Pokemon_Trainer.findOne({
+        where: { name: trainerName, userId },
+        include: [ Pokemon_Trainer.Team ]
+    });
+    if (!trainer) return [null, `Désolé, mais ${trainerName} n'est pas un Dresseur.`];
+
+    const creatures = await trainer.getCreatures({
+        where: { place },
+        include: [ Pokemon_Creature.Specie ]
+    });
+    if (creatures.length === 0 && place === 'team')
+        return [null, `Désolé, mais ${trainer} n'a pas de pokémon !`];
+
+    let options = [];
+    for (const creature of creatures) {
+        const specie = await creature.getSpecie();
+        options.push({
+            label: creature.nickname ? creature.nickname : specie.name,
+            description: `${await creature.getSpecieName()} niveau ${creature.level}`,
+            value: `${creature.id}`
+        })
+    }
+
+    return [trainer, options];
+}
+
 module.exports = {
-    createCreature
+    createCreature,
+    getSpecie,
+    setAllOptions
 }

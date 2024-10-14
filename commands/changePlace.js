@@ -4,9 +4,8 @@ const {
     ActionRowBuilder,
     StringSelectMenuBuilder
 } = require('discord.js');
-const { Pokemon_Trainer, Pokemon_Creature, Pokemon_Specie } = require('../classes');
-const { Op } = require("sequelize");
 const { Stock } = require('../datas/stock');
+const { setAllOptions } = require('../datas/generalFunctions');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -23,59 +22,57 @@ module.exports = {
      * @param {ChatInputCommandInteraction} interaction 
      */
     async execute(interaction) {
-        const trainer = interaction.options.getString('trainer');
-
+        const trainer = interaction.options.getString('trainer').trim();
         const userId = interaction.user.id;
-        const trainerFounded = await Pokemon_Trainer.findOne({
-            where: { name: trainer, userId },
-            include: [ Pokemon_Trainer.Team ]
-        });
-        if (!trainerFounded) {
-            return await interaction.reply({
-                content: `${trainer} n'est pas un Dresseur.`,
-                ephemeral: true
-            });
-        }
-
-        Stock.trainerSaved[userId] = [trainerFounded, ''];
 
         let options = [];
-        const creaturesTeam = await trainerFounded.getCreatures({ where: { place: 'team' }, include: [ Pokemon_Creature.Specie ] });
-        if (creaturesTeam.length === 0) {
+        const [trainerFounded, allTeams] = await setAllOptions(userId, trainer);
+        if (typeof allTeams === 'string')
             return await interaction.reply({
-                content: `Mais ${trainer} n'a pas de pokémon dans son équipe !`,
+                content: allTeams,
                 ephemeral: true
             });
-        }
 
-        const creaturesPC = await trainerFounded.getCreatures({ where: { place: 'computer' }, include: [ Pokemon_Creature.Specie ] });
+        const [_, allPC] = await setAllOptions(userId, trainer, 'computer');
+        if (typeof allPC === 'string')
+            return await interaction.reply({
+                content: allPC,
+                ephemeral: true
+            });
+
+        Stock.trainerSaved[userId] = trainerFounded;
         
-        if (creaturesTeam.length < 6 && creaturesPC.length > 0) {
+        if (allTeams.length < 6 && allPC.length > 0)
             options.push({
                 label: `Retirer`,
                 description: `Intégrer dans l'équipe des pokémons pris des boîtes.`,
                 value: `withdraw`
-            })
-        }
-        if (creaturesTeam.length > 1) {
+            });
+
+        if (allTeams.length > 1)
             options.push({
                 label: `Déposer`,
                 description: `Déposer des pokémons de l'équipe dans des boîtes.`,
                 value: `deposit`
-            })
-        }
+            });
 
-        const choices = new ActionRowBuilder()
-                        .addComponents(
-                            new StringSelectMenuBuilder()
-                                .setCustomId('place_choices')
-                                .setPlaceholder(`Retirer ou déposer ?`)
-                                .addOptions(options)
-                        )
+        if (options.length === 0)
+            return await interaction.reply({
+                content: `Vous n'avez qu'un pokémon.`,
+                ephemeral: true
+            });
 
         return await interaction.reply({
             content: `Qu'est-ce que vous voulez faire ?`,
-            components: [choices]
+            components: [
+                new ActionRowBuilder()
+                    .addComponents(
+                        new StringSelectMenuBuilder()
+                            .setCustomId('place_choices')
+                            .setPlaceholder(`Retirer ou déposer ?`)
+                            .addOptions(options)
+                    )
+            ]
         })
     }
 }

@@ -2,9 +2,8 @@ const {
     SlashCommandBuilder,
     ChatInputCommandInteraction
 } = require('discord.js');
-const { Pokemon_Trainer, Pokemon_Specie } = require('../classes');
+const { Pokemon_Trainer } = require('../classes');
 const { createCreature } = require('../datas/generalFunctions');
-const { Op } = require("sequelize");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -31,41 +30,28 @@ module.exports = {
      * @returns {void}
      */
     async execute(interaction) {
-        const name = interaction.options.getString('trainer_name');
+        const name = interaction.options.getString('trainer_name').trim();
         const starter = interaction.options.getString('starter');
-        const nickname = interaction.options.getString('nickname');
+        let nickname = interaction.options.getString('nickname');
+        if (nickname) nickname = nickname.trim();
 
-        const pokemonFounded = await Pokemon_Specie.findOne({
-            where: {
-                starter: true,
-                [Op.or]: [
-                    { name: starter.split('/')[0] },
-                    { english_name: starter.split('/')[0] }
-                ]
-            }
-        });
+        let [pokename, region] = starter.split('/');
+        pokename = pokename.trim();
+        if (region) region = region.trim();
         
         let userId = interaction.user.id;
         let firstData = { name, userId };
-        if (!await Pokemon_Trainer.findOne({where: firstData})) {
-            if (!pokemonFounded) {
-                return await interaction.reply({
-                    content: `Désolé, mais il n'existe aucun pokémon du nom de ${starter.split('/')[0]}.`,
-                    ephemeral: true
-                });
-            }
-
-            const newTrainer = await Pokemon_Trainer.create(firstData);
-            const returned = await createCreature(interaction, newTrainer, starter, 5, {place: 'team', nickname}, true);
-            if (returned) {
-                await interaction.reply({
-                    content: `Bonjour, ${name}.\nBienvenue dans le Monde Pokémon`,
-                    ephemeral: true
-                });
-            }
-        } else {
+        if (await Pokemon_Trainer.findOne({where: firstData})) {
             await interaction.reply({
                 content: `Désolé, mais tu existes déjà, ${name}.`,
+                ephemeral: true
+            });
+        } else {
+            const newTrainer = await Pokemon_Trainer.create(firstData);
+            const returned = await createCreature(interaction, newTrainer, starter, 5, {place: 'team', nickname}, true);
+            if (returned) return await interaction.reply(`Bonjour, ${name}.\nBienvenue dans le Monde Pokémon`);
+            else return await interaction.reply({
+                content: `Désolé, le pokémon n'existe pas.`,
                 ephemeral: true
             });
         }

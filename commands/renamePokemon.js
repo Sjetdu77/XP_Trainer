@@ -1,9 +1,11 @@
 const {
     SlashCommandBuilder,
-    ChatInputCommandInteraction
+    ChatInputCommandInteraction,
+    ActionRowBuilder,
+    StringSelectMenuBuilder
 } = require('discord.js');
-const { Pokemon_Trainer, Pokemon_Specie, Pokemon_Creature } = require('../classes');
-const { Op } = require("sequelize");
+const { Stock } = require('../datas/stock');
+const { setAllOptions } = require('../datas/generalFunctions');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,16 +15,6 @@ module.exports = {
             option.setName('trainer')
                 .setDescription('Dresseur associé')
                 .setRequired(true)
-        )
-        .addStringOption(option => 
-            option.setName('pokemon')
-                .setDescription('Le Pokémon à renommer')
-                .setRequired(true)
-        )
-        .addStringOption(option => 
-            option.setName('nickname')
-                .setDescription('Surnom du pokémon')
-                .setRequired(true)
         ),
 
     /**
@@ -30,56 +22,28 @@ module.exports = {
      * @param {ChatInputCommandInteraction} interaction 
      */
     async execute(interaction) {
-        const trainer = interaction.options.getString('trainer');
-        const pokemon = interaction.options.getString('pokemon');
-        const nickname = interaction.options.getString('nickname');
-
+        const trainer = interaction.options.getString('trainer').trim();
         const userId = interaction.user.id;
-        const trainerFounded = await Pokemon_Trainer.findOne({
-            where: { name: trainer, userId }
-        });
-
-        if (!trainerFounded) {
+        const [trainerFounded, options] = await setAllOptions(userId, trainer);
+        if (typeof options === 'string')
             return await interaction.reply({
-                content: `${trainer} n'est pas un Dresseur.`,
+                content: options,
                 ephemeral: true
             });
-        }
 
-        var pokemonFounded = await trainerFounded.getCreatures({ where: { nickname: pokemon } });
-        if (pokemonFounded.length === 0) {
-            const specieFounded = await Pokemon_Specie.findOne({
-                where: {
-                    [Op.or]: [
-                        { name: pokemon },
-                        { english_name: pokemon }
-                    ]
-                }
-            });
-            var pokemonFounded = await trainerFounded.getCreatures({ where: { specieId: specieFounded.id } });
-            
-            if (pokemonFounded.length === 0) {
-                return await interaction.reply({
-                    content: `Il n'y a pas de pokémon du nom de ${pokemon}.`,
-                    ephemeral: true
-                });
-            }
-        }
+        Stock.trainerSaved[userId] = trainerFounded;
 
-        if (pokemonFounded.length === 1) {
-            await Pokemon_Creature.update({ nickname }, { where: { id: pokemonFounded[0].id } });
-
-            return await interaction.reply({
-                content: `Pokémon surnommé`,
-                ephemeral: true
-            });
-        } else if (pokemonFounded.length > 1) await interaction.reply({
-            content: 'En travaux',
-            ephemeral: true
+        return await interaction.reply({
+            content: `Qui est-ce que vous voulez renommer ?`,
+            components: [
+                new ActionRowBuilder()
+                    .addComponents(
+                        new StringSelectMenuBuilder()
+                            .setCustomId('rename_choice')
+                            .setPlaceholder('A renommer')
+                            .addOptions(options)
+                    )
+            ]
         });
-        else await interaction.reply({
-            content: `Il n'existe pas de pokémon du nom de ${pokemon}`,
-            ephemeral: true
-        })
     }
 }
