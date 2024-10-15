@@ -24,17 +24,17 @@ module.exports = {
      */
     async execute(interaction) {
         const userId = interaction.user.id;
-        const trainer = interaction.options.getString('trainer').trim();
-        const trainerFounded = await Pokemon_Trainer.findOne({
-            where: { name: trainer, userId }
+        const trainerName = interaction.options.getString('trainer').trim();
+        const trainer = await Pokemon_Trainer.findOne({
+            where: { name: trainerName, userId }
         });
-        if (!trainerFounded)
+        if (!trainer)
             return await interaction.reply({
-                content: `Désolé, mais ${trainer} n'est pas un Dresseur.`,
+                content: `Désolé, mais ${trainerName} n'est pas un Dresseur.`,
                 ephemeral: true
             });
 
-        const creatures = await trainerFounded.getCreatures({
+        const creatures = await trainer.getCreatures({
             where: { place: 'team' },
             include: [ Pokemon_Creature.Specie ]
         });
@@ -50,8 +50,8 @@ module.exports = {
                 })
             }
 
-        Stock.trainerSaved[userId] = trainerFounded;
-        Stock.teamSaved[trainerFounded.id] = teamSaved;
+        Stock.trainerSaved[userId] = trainer;
+        Stock.teamSaved[trainer.id] = teamSaved;
 
         if (options.length === 0) return await interaction.reply({
             content: `Désolé, mais aucun pokémon ne peut évoluer.`,

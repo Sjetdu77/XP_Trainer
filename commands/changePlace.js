@@ -25,7 +25,7 @@ module.exports = {
         const userId = interaction.user.id;
 
         let options = [];
-        const [trainerFounded, allTeams] = await setAllOptions(userId, trainer);
+        const [__, allTeams] = await setAllOptions(userId, trainer);
         if (typeof allTeams === 'string')
             return await interaction.reply({
                 content: allTeams,

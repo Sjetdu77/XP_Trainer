@@ -1,11 +1,8 @@
 const {
-    StringSelectMenuInteraction,
-	ActionRowBuilder,
-    StringSelectMenuBuilder,
+    StringSelectMenuInteraction
 } = require('discord.js');
 const { Stock } = require('../datas/stock');
-const { Pokemon_Creature } = require('../classes');
-const { getName } = require('../datas/generalFunctions');
+const { setMenuBuilder } = require('../datas/generalFunctions');
 
 /**
  * 
@@ -14,37 +11,18 @@ const { getName } = require('../datas/generalFunctions');
  */
 async function deposit_response(interaction) {
     const userId = interaction.user.id;
-    const trainer = Stock.trainerSaved[userId];
-    const allCreaturesTeam = await trainer.getCreatures({
-        where: { place: 'team' },
-        include: [ Pokemon_Creature.Specie ]
+    const [trainer, component] = await setMenuBuilder(
+        userId, Stock.trainerSaved[userId].name,
+        'deposited', 'Qui à déposer ?', true, true
+    )
+    if (trainer === null) return await interaction.reply({
+        content: component,
+        ephemeral: true
     });
-
-    let team = [], teamSaved = {};
-
-    for (const creature of allCreaturesTeam) {
-        teamSaved[`${creature.id}`] = creature;
-        team.push({
-            label: await getName(creature),
-            description: `${await creature.getSpecieName()} niveau ${creature.level}`,
-            value: `${creature.id}`
-        })
-    }
-    Stock.teamSaved[trainer.id] = teamSaved;
-
-    const choices = new ActionRowBuilder()
-                    .addComponents(
-                        new StringSelectMenuBuilder()
-                            .setCustomId('deposited')
-                            .setPlaceholder('Qui à déposer ?')
-                            .setMinValues(1)
-                            .setMaxValues(team.length - 1)
-                            .addOptions(team)
-                    )
 
     await interaction.update({
         content: 'Choisissez les pokémons à déposer.',
-        components: [choices]
+        components: [component]
     });
 }
 

@@ -1,11 +1,9 @@
 const {
     SlashCommandBuilder,
-    ChatInputCommandInteraction,
-    ActionRowBuilder,
-    StringSelectMenuBuilder
+    ChatInputCommandInteraction
 } = require('discord.js');
 const { Stock } = require('../datas/stock');
-const { setAllOptions } = require('../datas/generalFunctions');
+const { setMenuBuilder } = require('../datas/generalFunctions');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -27,29 +25,22 @@ module.exports = {
      * @param {ChatInputCommandInteraction} interaction 
      */
     async execute(interaction) {
-        const trainer = interaction.options.getString('trainer').trim();
         const experience = interaction.options.getInteger('xp');
-        const userId = interaction.user.id;
-        const [trainerFounded, options] = await setAllOptions(userId, trainer);
-        if (typeof options === 'string')
-            return await interaction.reply({
-                content: options,
-                ephemeral: true
-            });
+        const [trainer, component] = await setMenuBuilder(
+            interaction.user.id,
+            interaction.options.getString('trainer').trim(),
+            'experience', 'Qui à entraîner ?'
+        )
+        if (trainer === null) return await interaction.reply({
+            content: component,
+            ephemeral: true
+        });
 
-        Stock.numberSaved[trainerFounded.id] = experience;
+        Stock.numberSaved[trainer.id] = experience;
 
         return await interaction.reply({
             content: `Quel pokémon a le droit à ${experience} points d'expérience de plus ?`,
-            components: [
-                new ActionRowBuilder()
-                        .addComponents(
-                            new StringSelectMenuBuilder()
-                                .setCustomId('experience')
-                                .setPlaceholder('Qui à entraîner ?')
-                                .addOptions(options)
-                        )
-            ]
+            components: [ component ]
         });
     }
 }

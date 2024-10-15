@@ -1,4 +1,4 @@
-const { ChatInputCommandInteraction } = require('discord.js');
+const { ChatInputCommandInteraction, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const { Pokemon_Trainer, Pokemon_Creature, Pokemon_Specie } = require('../classes');
 const { Op } = require('sequelize');
 const { Stock } = require('./stock');
@@ -82,6 +82,7 @@ async function createCreature(interaction, trainer, specieOrigin, level, otherVa
             level,
             actualXP: specieFounded.calculateLvlXP(level - 1),
             specieId: specieFounded.id,
+            happiness: level === 1 ? 100 : otherValues.friendBall ? 150 : 50,
         },
         ...otherValues
     }
@@ -140,9 +141,33 @@ async function getName(creature) {
     return creature.nickname ? creature.nickname : specie.name;
 }
 
+/**
+ * 
+ * @param {string} userId 
+ * @param {string} trainerName 
+ * @param {string} customId 
+ * @param {string} placeholder 
+ * @param {boolean} unique 
+ * @param {boolean} gap 
+ * @returns {Promise<[Pokemon_Creature, ActionRowBuilder] | [null, string]>}
+ */
+async function setMenuBuilder(userId, trainerName, customId, placeholder, unique=false, gap=false) {
+    const [trainer, options] = await setAllOptions(userId, trainerName);
+    if (typeof options === 'string') return [null, options];
+    let stringMenu = new StringSelectMenuBuilder()
+                        .setCustomId(customId)
+                        .setPlaceholder(placeholder)
+                        .setOptions(options);
+
+    if (unique) stringMenu = stringMenu.setMaxValues(options.length - (gap ? 1 : 0));
+
+    return [ trainer, new ActionRowBuilder().addComponents(stringMenu) ];
+}
+
 module.exports = {
     createCreature,
     getSpecie,
     setAllOptions,
-    getName
+    getName,
+    setMenuBuilder
 }

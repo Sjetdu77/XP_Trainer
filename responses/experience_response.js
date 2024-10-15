@@ -20,7 +20,7 @@ async function experience_response(interaction) {
     const gain = await creature.gainXP(experience);
     let content = `${name} gagne ${experience} points d'expérience.`;
     if (gain > 0)
-        content += `${name} gagne ${gain} niveaux.`;
+        content += `\n${name} gagne ${gain} niveaux.`;
     await interaction.update({
         content,
         components: []

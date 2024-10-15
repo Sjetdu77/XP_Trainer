@@ -18,10 +18,12 @@ const {
 	rename_choice_response,
 	rename_type_response,
 	evolute_response,
-	evolution_response
+	evolution_response,
+	happiness_response,
+	set_happiness_response
 } = require('./responses.js');
 const { token } = require('./config.json');
-const { synchronize } = require('./classes.js');
+const { synchronize, Pokemon_Creature } = require('./classes.js');
 const { Stock } = require('./datas/stock');
 
 let clientId = null;
@@ -84,6 +86,8 @@ client.on(Events.InteractionCreate, async interaction => {
 			case 'rename_choice': return await rename_choice_response(interaction);
 			case 'evolute': return await evolute_response(interaction);
 			case 'evolution': return await evolution_response(interaction);
+			case 'happiness': return await happiness_response(interaction);
+			case 'set_happiness': return await set_happiness_response(interaction);
 			case 'place_choices':
 				if (interaction.values[0] == 'withdraw') await withdraw_response(interaction);
 				else if (interaction.values[0] == 'deposit') await deposit_response(interaction);

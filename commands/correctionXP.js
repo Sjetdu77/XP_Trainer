@@ -1,11 +1,9 @@
 const {
     SlashCommandBuilder,
-    ChatInputCommandInteraction,
-    ActionRowBuilder,
-    StringSelectMenuBuilder
+    ChatInputCommandInteraction
 } = require('discord.js');
 const { Stock } = require('../datas/stock');
-const { createCreature, setAllOptions } = require('../datas/generalFunctions');
+const { createCreature, setMenuBuilder } = require('../datas/generalFunctions');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -32,7 +30,16 @@ module.exports = {
      * @param {ChatInputCommandInteraction} interaction 
      */
     async execute(interaction) {
-        const trainer = interaction.options.getString('trainer').trim();
+        const [trainer, component] = await setMenuBuilder(
+            interaction.user.id,
+            interaction.options.getString('trainer').trim(),
+            'correction', 'Qui à corriger ?', true, true
+        )
+        if (trainer === null) return await interaction.reply({
+            content: component,
+            ephemeral: true
+        });
+
         const foe = interaction.options.getString('foe').trim();
         const level = interaction.options.getInteger('level');
         const returned = await createCreature(interaction, null, foe, level);
@@ -42,28 +49,11 @@ module.exports = {
                 ephemeral: true
             });
 
-        const userId = interaction.user.id;
-        const [trainerFounded, options] = await setAllOptions(userId, trainer);
-        if (typeof options === 'string')
-            return await interaction.reply({
-                content: options,
-                ephemeral: true
-            });
 
-        Stock.creatureSaved[trainerFounded.id] = returned;
+        Stock.creatureSaved[trainer.id] = returned;
         return await interaction.reply({
             content: `Quel pokémon est-ce qu'on va retirer l'expérience ?`,
-            components: [
-                new ActionRowBuilder()
-                        .addComponents(
-                            new StringSelectMenuBuilder()
-                                .setCustomId('correction')
-                                .setPlaceholder('Qui à corriger ?')
-                                .setMinValues(1)
-                                .setMaxValues(options.length - 1)
-                                .addOptions(options)
-                        )
-            ]
+            components: [ component ]
         });
     }
 }

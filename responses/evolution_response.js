@@ -10,9 +10,8 @@ const { getName } = require('../datas/generalFunctions');
  * @returns 
  */
 async function evolution_response(interaction) {
-    const userId = interaction.user.id;
     const selected = interaction.values[0];
-    const trainer = Stock.trainerSaved[userId];
+    const trainer = Stock.trainerSaved[interaction.user.id];
     const creature = Stock.teamSaved[trainer.id];
     const name = await getName(creature);
     const newSpecie = await creature.evolution(Stock.creatureSaved[trainer.id][selected]);

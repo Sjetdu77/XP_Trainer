@@ -16,7 +16,6 @@ class Pokemon_Creature extends Model {
      */
     async gainXPViaFoe(foe, participate = false) {
         const trainer = await this.getTrainer();
-        const specie = await this.getSpecie({ include: [Pokemon_Specie.Evolution] });
         const foesSpecie = await foe.getSpecie();
         const trainerDatas = await trainer.getDatasFromTrainer();
 
@@ -31,7 +30,7 @@ class Pokemon_Creature extends Model {
 
         experience = Math.round(experience);
 
-        const lvlGained = await this.gainXP(experience);
+        const lvlGained = await this.gainXP(experience, true);
 
         return [experience, lvlGained];
     }
@@ -41,7 +40,7 @@ class Pokemon_Creature extends Model {
      * @param {number} exp 
      * @returns 
      */
-    async gainXP(exp) {
+    async gainXP(exp, battle = false) {
         if (!this.actualXP) this.actualXP = 0;
         this.actualXP += exp;
         let numLevelUp = 0, maxXP = await this.getMaxXP();
@@ -50,8 +49,8 @@ class Pokemon_Creature extends Model {
             numLevelUp++;
             this.level++;
 
-            if (this.happiness < 100) this.happiness += 3;
-            else if (this.happiness < 160) this.happiness += 2;
+            this.changeHappiness([3, 2, 0, 0]);
+            if (battle) this.changeHappiness([3, 2, 0, 0]);
             
             maxXP = await this.getMaxXP();
         }
@@ -86,7 +85,6 @@ class Pokemon_Creature extends Model {
      */
     async minusXPViaFoe(foe) {
         const trainer = await this.getTrainer();
-        const specie = await this.getSpecie({ include: [Pokemon_Specie.Evolution] });
         const foesSpecie = await foe.getSpecie();
         const trainerDatas = await trainer.getDatasFromTrainer();
         
@@ -201,6 +199,22 @@ class Pokemon_Creature extends Model {
         this.save();
         return await Pokemon_Specie.findOne({ where: { id: specie.evolutionId } });
     }
+
+    /**
+     * 
+     * @param {number[]} hPoints 
+     * @returns {number}
+     */
+    changeHappiness(hPoints) {
+        if (hPoints.length < 4) return -1;
+        
+        if (this.happiness < 100) this.happiness += hPoints[0];
+        else if (this.happiness < 160) this.happiness += hPoints[1];
+        else if (this.happiness < 180) this.happiness += hPoints[2];
+        else this.happiness += hPoints[3];
+        this.save();
+        return this.happiness;
+    }
 }
 
 Pokemon_Creature.init({
@@ -227,7 +241,7 @@ Pokemon_Creature.init({
     },
     happiness: {
         type: DataTypes.INTEGER,
-        defaultValue: 70
+        defaultValue: 50
     },
     place: {
         type: DataTypes.STRING,

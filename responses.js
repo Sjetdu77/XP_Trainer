@@ -10,6 +10,8 @@ const rename_choice_response = require('./responses/rename_choice_response.js');
 const rename_type_response = require('./responses/rename_type_response.js');
 const evolute_response = require('./responses/evolute_response.js');
 const evolution_response = require('./responses/evolution_response.js');
+const happiness_response = require('./responses/happiness_response.js');
+const set_happiness_response = require('./responses/set_happiness_response.js');
 
 module.exports = {
     winners_response,
@@ -23,5 +25,7 @@ module.exports = {
     rename_choice_response,
     rename_type_response,
     evolute_response,
-    evolution_response
+    evolution_response,
+    happiness_response,
+    set_happiness_response,
 }
