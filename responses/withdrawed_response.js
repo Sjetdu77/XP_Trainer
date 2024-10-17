@@ -30,6 +30,7 @@ async function withdrawed_response(message) {
     }
 
     await message.reply(s);
+    stock.clear();
 }
 
 module.exports = withdrawed_response;

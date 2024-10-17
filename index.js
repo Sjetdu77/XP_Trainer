@@ -106,8 +106,8 @@ client.on(Events.MessageCreate, async message => {
 	const stock = Stocks.getStock(userId);
 	if (stock.notEmpty() && userId !== clientId) {
 		switch (stock.mode) {
-			case "withdraw": return await withdrawed_response(message);
-			case "rename": return await rename_type_response(message);
+			case "withdraw": await withdrawed_response(message);
+			case "rename": await rename_type_response(message);
 		}
 
 		stock.clear();
