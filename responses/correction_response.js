@@ -1,7 +1,7 @@
 const {
     StringSelectMenuInteraction
 } = require('discord.js');
-const { Stock } = require('../datas/stock');
+const { Stocks } = require('../datas/stock');
 const { getName } = require('../datas/generalFunctions');
 
 /**
@@ -11,14 +11,13 @@ const { getName } = require('../datas/generalFunctions');
  */
 async function correction_response(interaction) {
     const userId = interaction.user.id;
-    const selected = interaction.values;
-    const trainer = Stock.trainerSaved[userId];
+    const stock = Stocks.getStock(userId);
 
     var content = '';
-    for (const [id, creature] of Object.entries(Stock.teamSaved[trainer.id])) {
-        if (selected.includes(id)) {
+    for (const [id, creature] of Object.entries(stock.team)) {
+        if (interaction.values.includes(id)) {
             const name = await getName(creature);
-            const loses = await creature.minusXPViaFoe(Stock.creatureSaved[trainer.id]);
+            const loses = await creature.minusXPViaFoe(stock.creature);
             const lvlLost = loses[1];
             content += `${name} perd ${loses[0]} points d'expérience.\n`;
             if (lvlLost > 0) content += `${name} perd ${lvlLost} niveau${lvlLost > 1 ? 'x' : ''}.\n`;
@@ -31,9 +30,7 @@ async function correction_response(interaction) {
         components: []
     });
 
-    Stock.creatureSaved[trainer.id] = null;
-    Stock.teamSaved[trainer.id] = null;
-    Stock.trainerSaved[userId] = null;
+    stock.clear();
 }
 
 module.exports = correction_response;

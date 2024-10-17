@@ -15,8 +15,9 @@ async function setDatas(embed, table) {
     for (const creature of table) {
         const rate = await creature.getXPRate() * 100;
         const name = await getName(creature);
-        let value = `${await creature.getSpecieName()} niveau ${creature.level}\n`;
-        value += `Bonheur : ${creature.happiness}\n`;
+        let value = `${await creature.getSpecieName()} niveau ${creature.level}`;
+        if (creature.captured !== creature.team) value += ` (échangé)`;
+        value += `\nBonheur : ${creature.happiness}\n`;
         value += '`XP: [';
         for (let t = 1; t <= 25; t++) value += rate / 4 >= t ? '|' : ' ';
         value += ']`\n';
@@ -43,8 +44,12 @@ async function createEmbedModel(trainer, creatures) {
     const inTeam = [];
     const inPC = [];
 
-    for (const creature of creatures)
-        (creature.place === 'team' ? inTeam : inPC).push(creature);
+    for (const creature of creatures) {
+        let stock = [];
+        if (creature.place === 'team') stock = inTeam;
+        else if (creature.place === 'computer') stock = inTeam;
+        stock.push(creature);
+    }
 
     embed.fields.push({ name: `--- Dans l'équipe ---`, value: '' });
     await setDatas(embed, inTeam);
@@ -71,18 +76,8 @@ module.exports = {
      * @param {ChatInputCommandInteraction} interaction 
      */
     async execute(interaction) {
-        let options = interaction.options;
-        let user = options.getUser('user');
-        if (!user) {
-            await interaction.reply({
-                ephemeral: true,
-                content: `Nous avons besoin d'un joueur.`
-            });
-            return;
-        }
-
         let datas = await Pokemon_Trainer.findAll({
-            where: { userId: user.id },
+            where: { userId: interaction.options.getUser('user', true).id },
             include: [Pokemon_Trainer.Team]
         });
         if (datas.length === 0) {
@@ -93,7 +88,13 @@ module.exports = {
 
         let embeds = [];
         for (const trainer of datas) {
-            const allCreatures = await trainer.getCreatures({ include: [Pokemon_Creature.Specie] });
+            const allCreatures = await trainer.getCreatures({
+                include: [
+                    Pokemon_Creature.Specie,
+                    Pokemon_Creature.Captured,
+                    Pokemon_Creature.Trainer
+                ]
+            });
             embeds.push(await createEmbedModel(trainer, allCreatures));
         }
 
@@ -107,6 +108,5 @@ module.exports = {
                 ephemeral: true
             })
         }
-        
     }
 }

@@ -8,18 +8,21 @@ const { Stocks } = require('../datas/stock');
  * @param {StringSelectMenuInteraction} interaction 
  * @returns 
  */
-async function rename_choice_response(interaction) {
+async function leave_response(interaction) {
     const userId = interaction.user.id;
     const stock = Stocks.getStock(userId);
     const creature = stock.team[interaction.values[0]];
+    const exchanged = stock.creature;
+
+    creature.update({ place: 'exchanged' });
+    exchanged.update({ place: 'team' });
 
     await interaction.update({
-        content: `Quel est le nouveau nom du ${await creature.getSpecieName()} ? (Ne tapez que le nom)`,
-        components: []
+        content: `Echange accomplie !`,
+        components: [ ]
     });
 
-    stock.creature = creature;
-    stock.mode = 'rename';
+    stock.clear();
 }
 
-module.exports = rename_choice_response;
+module.exports = leave_response;

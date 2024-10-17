@@ -102,6 +102,10 @@ Pokemon_Specie.init({
     starter: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
+    },
+    happinessBase: {
+        type: DataTypes.INTEGER,
+        defaultValue: 50
     }
 }, {
     sequelize: dataBaseTable,

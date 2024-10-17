@@ -7,6 +7,9 @@ const Specie_Evolution = require('./class/Specie_Evolution');
 Pokemon_Trainer.Team = Pokemon_Trainer.hasMany(Pokemon_Creature, { foreignKey: { allowNull: true, name: 'team' } });
 Pokemon_Creature.Trainer = Pokemon_Creature.belongsTo(Pokemon_Trainer, { foreignKey: { allowNull: true, name: 'team' } });
 
+Pokemon_Trainer.Captured = Pokemon_Trainer.hasMany(Pokemon_Creature, { foreignKey: { allowNull: true, name: 'captured' } });
+Pokemon_Creature.Captured = Pokemon_Creature.belongsTo(Pokemon_Trainer, { foreignKey: { allowNull: true, name: 'captured' } });
+
 Pokemon_Specie.Creatures = Pokemon_Specie.hasMany(Pokemon_Creature, { foreignKey: { allowNull: true } });
 Pokemon_Creature.Specie = Pokemon_Creature.belongsTo(Pokemon_Specie, { foreignKey: { allowNull: true } });
 

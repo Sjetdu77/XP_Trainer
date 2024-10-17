@@ -43,16 +43,14 @@ class Pokemon_Creature extends Model {
     async gainXP(exp, battle = false) {
         if (!this.actualXP) this.actualXP = 0;
         this.actualXP += exp;
-        let numLevelUp = 0, maxXP = await this.getMaxXP();
+        let numLevelUp = 0;
 
-        while (this.actualXP >= maxXP) {
+        while (this.actualXP >= await this.getMaxXP()) {
             numLevelUp++;
             this.level++;
 
             this.changeHappiness([3, 2, 0, 0]);
             if (battle) this.changeHappiness([3, 2, 0, 0]);
-            
-            maxXP = await this.getMaxXP();
         }
 
         this.actualXP = Math.floor(this.actualXP);
@@ -66,12 +64,15 @@ class Pokemon_Creature extends Model {
      * @param {number} exp 
      * @returns 
      */
-    async minusXP(exp) {
+    async minusXP(exp, battle = false) {
         let lvlLost = 0
         this.actualXP -= exp;
         while (this.actualXP < await this.getMinXP()) {
             this.level--;
             lvlLost++;
+
+            this.changeHappiness([-3, -2, 0, 0]);
+            if (battle) this.changeHappiness([-3, -2, 0, 0]);
         }
 
         this.save();
@@ -205,15 +206,25 @@ class Pokemon_Creature extends Model {
      * @param {number[]} hPoints 
      * @returns {number}
      */
-    changeHappiness(hPoints) {
+    changeHappiness(hPoints, undo) {
         if (hPoints.length < 4) return -1;
         
-        if (this.happiness < 100) this.happiness += hPoints[0];
-        else if (this.happiness < 160) this.happiness += hPoints[1];
-        else if (this.happiness < 180) this.happiness += hPoints[2];
-        else this.happiness += hPoints[3];
+        let gain;
+        if (this.happiness < 100) gain = hPoints[0];
+        else if (this.happiness < 160) gain = hPoints[1];
+        else if (this.happiness < 180) gain = hPoints[2];
+        else gain = hPoints[3];
+
+        if (this.sootheBell && (gain > 0 || undo)) gain *= 1.5;
+
+        this.happiness += gain;
         this.save();
         return this.happiness;
+    }
+
+    setSootheBell() {
+        this.sootheBell = !this.sootheBell;
+        this.save();
     }
 }
 
@@ -235,10 +246,6 @@ Pokemon_Creature.init({
         type: DataTypes.INTEGER,
         defaultValue: 0
     },
-    exchanged: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
-    },
     happiness: {
         type: DataTypes.INTEGER,
         defaultValue: 50
@@ -246,6 +253,10 @@ Pokemon_Creature.init({
     place: {
         type: DataTypes.STRING,
         defaultValue: 'wild'
+    },
+    sootheBell: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     }
 }, {
     sequelize: dataBaseTable,

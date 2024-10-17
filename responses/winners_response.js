@@ -1,7 +1,7 @@
 const {
     StringSelectMenuInteraction
 } = require('discord.js');
-const { Stock } = require('../datas/stock');
+const { Stocks } = require('../datas/stock');
 const { getName } = require('../datas/generalFunctions');
 
 /**
@@ -10,12 +10,11 @@ const { getName } = require('../datas/generalFunctions');
  */
 async function winners_response(interaction) {
     const userId = interaction.user.id;
-    const selected = interaction.values;
-    const trainer = Stock.trainerSaved[userId];
+    const stock = Stocks.getStock(userId);
     let content = ``;
 
-    for (const [id, creature] of Object.entries(Stock.teamSaved[trainer.id])) {
-        const gains = await creature.gainXPViaFoe(Stock.creatureSaved[trainer.id], selected.includes(id));
+    for (const [id, creature] of Object.entries(stock.team)) {
+        const gains = await creature.gainXPViaFoe(stock.creature, interaction.values.includes(id));
         const name = await getName(creature);
         content += `${name} gagne ${gains[0]} points d'expérience.\n`;
         if (gains[1] > 0) content += `${name} gagne ${gains[1]} niveau${gains[1] > 1 ? 'x' : ''}.\n`
@@ -27,8 +26,7 @@ async function winners_response(interaction) {
         components: []
     });
     
-    Stock.creatureSaved[trainer.id] = null;
-    Stock.trainerSaved[userId] = null;
+    stock.clear();
 }
 
 module.exports = winners_response;

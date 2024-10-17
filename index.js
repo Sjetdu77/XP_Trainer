@@ -20,11 +20,15 @@ const {
 	evolute_response,
 	evolution_response,
 	happiness_response,
-	set_happiness_response
+	set_happiness_response,
+	exchange_solo_response,
+	return_exchange_response,
+	leave_response
 } = require('./responses.js');
 const { token } = require('./config.json');
 const { synchronize, Pokemon_Creature } = require('./classes.js');
-const { Stock } = require('./datas/stock');
+const { Stocks } = require('./datas/stock.js');
+const trainer_response = require('./responses/trainer_response.js');
 
 let clientId = null;
 
@@ -65,10 +69,7 @@ for (const file of commandFiles) {
 client.on(Events.InteractionCreate, async interaction => {
     if (interaction.isChatInputCommand()) {
 		const command = interaction.client.commands.get(interaction.commandName);
-		if (!command) {
-			console.error(`No command matching ${interaction.commandName} was found.`);
-			return;
-		}
+		if (!command) return console.error(`No command matching ${interaction.commandName} was found.`);
 
 		try {
 			await command.execute(interaction);
@@ -76,30 +77,39 @@ client.on(Events.InteractionCreate, async interaction => {
 			console.error(error);
 			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
 		}
-	} else if (interaction.isStringSelectMenu())
+	} else if (interaction.isStringSelectMenu()) {
 		switch (interaction.customId) {
-			case 'winners': return await winners_response(interaction);
-			case 'deposited': return await deposited_response(interaction);
-			case 'correction': return await correction_response(interaction);
-			case 'levels': return await level_response(interaction);
-			case 'experience': return await experience_response(interaction);
-			case 'rename_choice': return await rename_choice_response(interaction);
-			case 'evolute': return await evolute_response(interaction);
-			case 'evolution': return await evolution_response(interaction);
-			case 'happiness': return await happiness_response(interaction);
-			case 'set_happiness': return await set_happiness_response(interaction);
+			case 'trainer':			return await trainer_response(interaction);
+			case 'winners': 		return await winners_response(interaction);
+			case 'deposited': 		return await deposited_response(interaction);
+			case 'correction': 		return await correction_response(interaction);
+			case 'levels': 			return await level_response(interaction);
+			case 'experience': 		return await experience_response(interaction);
+			case 'rename_choice': 	return await rename_choice_response(interaction);
+			case 'evolute': 		return await evolute_response(interaction);
+			case 'evolution': 		return await evolution_response(interaction);
+			case 'happiness': 		return await happiness_response(interaction);
+			case 'set_happiness':	return await set_happiness_response(interaction);
+			case 'exchange_solo':	return await exchange_solo_response(interaction);
+			case 'return_exchange':	return await return_exchange_response(interaction);
+			case 'leave':			return await leave_response(interaction);
 			case 'place_choices':
-				if (interaction.values[0] == 'withdraw') await withdraw_response(interaction);
-				else if (interaction.values[0] == 'deposit') await deposit_response(interaction);
+				if (interaction.values[0] == 'withdraw') 		await withdraw_response(interaction);
+				else if (interaction.values[0] == 'deposit') 	await deposit_response(interaction);
 				break;
 		}
+	}
 });
 
 client.on(Events.MessageCreate, async message => {
 	const userId = message.author.id;
-	if (userId !== clientId)
-		switch (Stock.modeSaved[userId]) {
+	const stock = Stocks.getStock(userId);
+	if (stock.notEmpty() && userId !== clientId) {
+		switch (stock.mode) {
 			case "withdraw": return await withdrawed_response(message);
 			case "rename": return await rename_type_response(message);
 		}
+
+		stock.clear();
+	}
 });

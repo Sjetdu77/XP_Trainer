@@ -12,6 +12,9 @@ const evolute_response = require('./responses/evolute_response.js');
 const evolution_response = require('./responses/evolution_response.js');
 const happiness_response = require('./responses/happiness_response.js');
 const set_happiness_response = require('./responses/set_happiness_response.js');
+const exchange_solo_response = require('./responses/exchange_solo_response.js');
+const return_exchange_response = require('./responses/return_exchange_response.js');
+const leave_response = require('./responses/leave_response.js');
 
 module.exports = {
     winners_response,
@@ -28,4 +31,7 @@ module.exports = {
     evolution_response,
     happiness_response,
     set_happiness_response,
+    exchange_solo_response,
+    return_exchange_response,
+    leave_response
 }

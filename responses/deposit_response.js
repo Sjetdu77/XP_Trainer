@@ -1,7 +1,7 @@
 const {
     StringSelectMenuInteraction
 } = require('discord.js');
-const { Stock } = require('../datas/stock');
+const { Stocks } = require('../datas/stock');
 const { setMenuBuilder } = require('../datas/generalFunctions');
 
 /**
@@ -11,11 +11,11 @@ const { setMenuBuilder } = require('../datas/generalFunctions');
  */
 async function deposit_response(interaction) {
     const userId = interaction.user.id;
-    const [trainer, component] = await setMenuBuilder(
-        userId, Stock.trainerSaved[userId].name,
-        'deposited', 'Qui à déposer ?', true, true
-    )
-    if (trainer === null) return await interaction.reply({
+    const component = await setMenuBuilder(
+        userId, Stocks.getStock(userId).chosenTrainer,
+        'deposited', 'Qui à déposer ?', false, true
+    );
+    if (typeof component === 'string') return await interaction.reply({
         content: component,
         ephemeral: true
     });

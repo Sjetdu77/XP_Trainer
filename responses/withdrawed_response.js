@@ -2,7 +2,7 @@ const {
     OmitPartialGroupDMChannel,
     Message
 } = require('discord.js');
-const { Stock } = require('../datas/stock');
+const { Stocks } = require('../datas/stock');
 
 /**
  * 
@@ -11,11 +11,10 @@ const { Stock } = require('../datas/stock');
  */
 async function withdrawed_response(message) {
     const userId = message.author.id;
+    const stock = Stocks.getStock(userId);
 	const content = message.content;
-    const trainer = Stock.trainerSaved[userId];
-
     const allQuotes = content.split(',')
-    const creaturesSaved = Stock.creatureSaved[trainer.id];
+    const creaturesSaved = stock.creature;
     const allCreatures = Object.keys(creaturesSaved);
     let s = '';
 
@@ -31,10 +30,6 @@ async function withdrawed_response(message) {
     }
 
     await message.reply(s);
-
-    Stock.creatureSaved[trainer.id] = null;
-    Stock.modeSaved[userId] = null;
-    Stock.trainerSaved[userId] = null;
 }
 
 module.exports = withdrawed_response;

@@ -30,9 +30,10 @@ module.exports = {
      * @returns {void}
      */
     async execute(interaction) {
-        const name = interaction.options.getString('trainer_name').trim();
-        const starter = interaction.options.getString('starter');
-        let nickname = interaction.options.getString('nickname');
+        const allOptions = interaction.options;
+        const name = allOptions.getString('trainer_name', true).trim();
+        const starter = allOptions.getString('starter', true);
+        let nickname = allOptions.getString('nickname');
         if (nickname) nickname = nickname.trim();
 
         let [pokename, region] = starter.split('/');
@@ -48,12 +49,17 @@ module.exports = {
             });
         } else {
             const newTrainer = await Pokemon_Trainer.create(firstData);
-            const returned = await createCreature(interaction, newTrainer, starter, 5, {place: 'team', nickname}, true);
+            const returned = await createCreature(
+                interaction, newTrainer, starter, 5,
+                {
+                    place: 'team',
+                    nickname,
+                    captured: newTrainer.id
+                },
+                true
+            );
             if (returned) return await interaction.reply(`Bonjour, ${name}.\nBienvenue dans le Monde Pokémon`);
-            else return await interaction.reply({
-                content: `Désolé, le pokémon n'existe pas.`,
-                ephemeral: true
-            });
+            else return await newTrainer.destroy();
         }
     },
 };

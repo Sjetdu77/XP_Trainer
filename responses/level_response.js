@@ -1,7 +1,7 @@
 const {
     StringSelectMenuInteraction
 } = require('discord.js');
-const { Stock } = require('../datas/stock');
+const { Stocks } = require('../datas/stock');
 const { getName } = require('../datas/generalFunctions');
 
 /**
@@ -11,20 +11,18 @@ const { getName } = require('../datas/generalFunctions');
  */
 async function level_response(interaction) {
     const userId = interaction.user.id;
-    const selected = interaction.values[0];
-    const trainer = Stock.trainerSaved[userId];
-    const creature = Stock.teamSaved[trainer.id][selected];
+    const stock = Stocks.getStock(userId);
+    const creature = stock.team[interaction.values[0]];
 
     const name = await getName(creature);
-    const levels = Stock.numberSaved[trainer.id];
+    const levels = stock.datas.lvls;
     creature.gainLevels(levels);
     await interaction.update({
         content: `${name} gagne ${levels} niveau${levels > 1 ? 'x' : ''}.`,
         components: []
     });
 
-    Stock.numberSaved[trainer.id] = null;
-    Stock.trainerSaved[userId] = null;
+    stock.clear();
 }
 
 module.exports = level_response;

@@ -1,7 +1,7 @@
 const {
     StringSelectMenuInteraction
 } = require('discord.js');
-const { Stock } = require('../datas/stock');
+const { Stocks } = require('../datas/stock');
 const { getName } = require('../datas/generalFunctions');
 
 /**
@@ -11,10 +11,9 @@ const { getName } = require('../datas/generalFunctions');
  */
 async function set_happiness_response(interaction) {
     const userId = interaction.user.id;
-    const selected = interaction.values[0];
-    const trainer = Stock.trainerSaved[userId];
-    const creature = Stock.teamSaved[trainer.id][selected];
-    const gain = creature.changeHappiness(Stock.numberSaved[trainer.id]);
+    const stock = Stocks.getStock(userId);
+    const creature = stock.team[interaction.values[0]];
+    const gain = creature.changeHappiness(stock.datas);
 
     return await interaction.update({
         content: `${await getName(creature)} a maintenant ${gain} points de bonheur.\n`,

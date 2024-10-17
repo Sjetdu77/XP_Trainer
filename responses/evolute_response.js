@@ -3,7 +3,7 @@ const {
 	ActionRowBuilder,
     StringSelectMenuBuilder,
 } = require('discord.js');
-const { Stock } = require('../datas/stock');
+const { Stocks } = require('../datas/stock');
 const { Pokemon_Specie } = require('../classes');
 const { getName } = require('../datas/generalFunctions');
 
@@ -13,9 +13,9 @@ const { getName } = require('../datas/generalFunctions');
  * @returns 
  */
 async function evolute_response(interaction) {
-    const selected = interaction.values[0];
-    const trainer = Stock.trainerSaved[interaction.user.id];
-    const creature = Stock.teamSaved[trainer.id][selected];
+    const userId = interaction.user.id;
+    const stock = Stocks.getStock(userId);
+    const creature = stock.team[interaction.values[0]];
     const name = await getName(creature);
     const evolutions = await creature.getGoodEvolutions();
     if (evolutions.length === 1) {
@@ -36,8 +36,8 @@ async function evolute_response(interaction) {
             });
             creatureSaved[`${specie.id}`] = evolution;
         }
-        Stock.creatureSaved[trainer.id] = creatureSaved;
-        Stock.teamSaved[trainer.id] = creature;
+        stock.creature = creature;
+        stock.team = creatureSaved;
 
         return await interaction.update({
             content: `Quelle évolution on attribue à ${name} ?`,

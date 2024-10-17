@@ -1,7 +1,7 @@
 const {
     StringSelectMenuInteraction
 } = require('discord.js');
-const { Stock } = require('../datas/stock');
+const { Stocks } = require('../datas/stock');
 const { Pokemon_Creature } = require('../classes');
 const { getName } = require('../datas/generalFunctions');
 
@@ -12,7 +12,8 @@ const { getName } = require('../datas/generalFunctions');
  */
 async function withdraw_response(interaction) {
     const userId = interaction.user.id;
-    const trainer = Stock.trainerSaved[userId];
+    const stock = Stocks.getStock(userId);
+    const trainer = stock.chosenTrainer;
     const allCreaturesPC = await trainer.getCreatures({
         where: { place: 'computer' },
         include: [ Pokemon_Creature.Specie ]
@@ -47,8 +48,8 @@ async function withdraw_response(interaction) {
         values[code] = creature;
     }
 
-    Stock.creatureSaved[trainer.id] = values;
-    Stock.modeSaved[userId] = 'withdraw';
+    stock.creature = values;
+    stock.mode = 'withdraw';
 
     await interaction.update({
         content: 'Choisissez les pokémons à retirer. (pour retirer plusieurs pokémons, mettez des virgules entre les pokémons)',

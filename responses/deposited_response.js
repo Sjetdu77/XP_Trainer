@@ -1,7 +1,7 @@
 const {
     StringSelectMenuInteraction
 } = require('discord.js');
-const { Stock } = require('../datas/stock');
+const { Stocks } = require('../datas/stock');
 
 /**
  * 
@@ -10,17 +10,16 @@ const { Stock } = require('../datas/stock');
  */
 async function deposited_response(interaction) {
     const userId = interaction.user.id;
-    const selected = interaction.values;
-    const trainer = Stock.trainerSaved[userId];
+    const stock = Stocks.getStock(userId);
 
-    for (const [id, creature] of Object.entries(Stock.teamSaved[trainer.id]))
-        if (selected.includes(id)) creature.update({ place: 'computer' });
+    for (const [id, creature] of Object.entries(stock.team))
+        if (interaction.values.includes(id)) creature.update({ place: 'computer' });
 
     await interaction.update({
         content: `Pokémons déposés !`,
         components: []
     });
-    Stock.trainerSaved[userId] = null;
+    stock.clear();
 }
 
 module.exports = deposited_response;

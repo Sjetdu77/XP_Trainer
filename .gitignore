@@ -1,3 +1,4 @@
+config
 config.json
 
 fill_conditions.js
@@ -9,3 +10,7 @@ deploy-commands.js
 .env
 node_modules
 second
+
+migrations
+models
+seeders

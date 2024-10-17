@@ -1,6 +1,6 @@
 {
   "name": "xp-trainer",
-  "version": "2.2.0",
+  "version": "3.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -16,8 +16,10 @@
     "discord.js": "^14.16.2",
     "jsdom": "^25.0.1",
     "lodash": "^4.17.21",
+    "mysql2": "^3.11.3",
     "needle": "^3.3.1",
-    "sequelize": "^6.37.3",
+    "sequelize": "^6.37.4",
+    "sequelize-cli": "^6.6.2",
     "sqlite3": "^5.1.7",
     "xp-trainer": "file:"
   }
