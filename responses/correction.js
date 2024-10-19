@@ -9,7 +9,7 @@ const { getName } = require('../datas/generalFunctions');
  * @param {StringSelectMenuInteraction} interaction 
  * @returns 
  */
-async function correction_response(interaction) {
+async function correction(interaction) {
     const userId = interaction.user.id;
     const stock = Stocks.getStock(userId);
 
@@ -33,4 +33,4 @@ async function correction_response(interaction) {
     stock.clear();
 }
 
-module.exports = correction_response;
+module.exports = correction;

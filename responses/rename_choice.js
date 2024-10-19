@@ -8,7 +8,7 @@ const { Stocks } = require('../datas/stock');
  * @param {StringSelectMenuInteraction} interaction 
  * @returns 
  */
-async function rename_choice_response(interaction) {
+async function rename_choice(interaction) {
     const userId = interaction.user.id;
     const stock = Stocks.getStock(userId);
     const creature = stock.team[interaction.values[0]];
@@ -19,7 +19,7 @@ async function rename_choice_response(interaction) {
     });
 
     stock.creature = creature;
-    stock.mode = 'rename';
+    stock.mode = 'rename_type';
 }
 
-module.exports = rename_choice_response;
+module.exports = rename_choice;

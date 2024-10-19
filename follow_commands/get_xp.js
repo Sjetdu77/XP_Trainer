@@ -1,12 +1,12 @@
 const {
-    ChatInputCommandInteraction
+    StringSelectMenuInteraction
 } = require("discord.js");
 const { Stocks } = require('../datas/stock');
 const { setMenuBuilder } = require('../datas/generalFunctions');
 
 /**
  * 
- * @param {ChatInputCommandInteraction} interaction 
+ * @param {StringSelectMenuInteraction} interaction 
  * @returns 
  */
 async function get_xp(interaction) {

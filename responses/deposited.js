@@ -8,7 +8,7 @@ const { Stocks } = require('../datas/stock');
  * @param {StringSelectMenuInteraction} interaction 
  * @returns 
  */
-async function deposited_response(interaction) {
+async function deposited(interaction) {
     const userId = interaction.user.id;
     const stock = Stocks.getStock(userId);
 
@@ -22,4 +22,4 @@ async function deposited_response(interaction) {
     stock.clear();
 }
 
-module.exports = deposited_response;
+module.exports = deposited;

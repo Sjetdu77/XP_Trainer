@@ -1,37 +1,45 @@
-const winners_response = require('./responses/winners_response.js');
-const withdraw_response = require('./responses/withdraw_response.js');
-const withdrawed_response = require('./responses/withdrawed_response.js');
-const deposit_response = require('./responses/deposit_response.js');
-const deposited_response = require('./responses/deposited_response.js');
-const correction_response = require('./responses/correction_response.js');
-const level_response = require('./responses/level_response.js');
-const experience_response = require('./responses/experience_response.js');
-const rename_choice_response = require('./responses/rename_choice_response.js');
-const rename_type_response = require('./responses/rename_type_response.js');
-const evolute_response = require('./responses/evolute_response.js');
-const evolution_response = require('./responses/evolution_response.js');
-const happiness_response = require('./responses/happiness_response.js');
-const set_happiness_response = require('./responses/set_happiness_response.js');
-const exchange_solo_response = require('./responses/exchange_solo_response.js');
-const return_exchange_response = require('./responses/return_exchange_response.js');
-const leave_response = require('./responses/leave_response.js');
+const correction = require('./responses/correction.js');
+const deposit = require('./responses/deposit.js');
+const deposited = require('./responses/deposited.js');
+const evolute = require('./responses/evolute.js');
+const evolution = require('./responses/evolution.js');
+const exchange_solo = require('./responses/exchange_solo.js');
+const exchange_trainer_1 = require('./responses/exchange_trainer_1.js');
+const exchange_trainer_2 = require('./responses/exchange_trainer_2.js');
+const experience = require('./responses/experience.js');
+const happiness = require('./responses/happiness.js');
+const leave = require('./responses/leave.js');
+const levels = require('./responses/levels.js');
+const place_choices = require('./responses/place_choices.js');
+const rename_choice = require('./responses/rename_choice.js');
+const rename_type = require('./responses/rename_type.js');
+const return_exchange = require('./responses/return_exchange.js');
+const set_happiness = require('./responses/set_happiness.js');
+const trainer = require('./responses/trainer.js');
+const winners = require('./responses/winners.js');
+const withdraw = require('./responses/withdraw.js');
+const withdrawed = require('./responses/withdrawed.js');
 
 module.exports = {
-    winners_response,
-    withdraw_response,
-    withdrawed_response,
-    deposit_response,
-    deposited_response,
-    correction_response,
-    level_response,
-    experience_response,
-    rename_choice_response,
-    rename_type_response,
-    evolute_response,
-    evolution_response,
-    happiness_response,
-    set_happiness_response,
-    exchange_solo_response,
-    return_exchange_response,
-    leave_response
+    winners,
+    withdraw,
+    withdrawed,
+    deposit,
+    deposited,
+    correction,
+    levels,
+    experience,
+    rename_choice,
+    rename_type,
+    evolute,
+    evolution,
+    happiness,
+    set_happiness,
+    exchange_solo,
+    return_exchange,
+    leave,
+    trainer,
+    place_choices,
+    exchange_trainer_1,
+    exchange_trainer_2,
 }

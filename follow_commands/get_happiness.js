@@ -1,12 +1,12 @@
 const {
-    ChatInputCommandInteraction,
+    StringSelectMenuInteraction,
     ActionRowBuilder,
     StringSelectMenuBuilder
 } = require("discord.js");
 
 /**
  * 
- * @param {ChatInputCommandInteraction} interaction 
+ * @param {StringSelectMenuInteraction} interaction 
  * @returns 
  */
 const get_happiness = async interaction => await interaction.update({

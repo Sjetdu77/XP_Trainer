@@ -9,7 +9,7 @@ const { setMenuBuilder } = require('../datas/generalFunctions');
  * @param {StringSelectMenuInteraction} interaction 
  * @returns 
  */
-async function deposit_response(interaction) {
+async function deposit(interaction) {
     const userId = interaction.user.id;
     const component = await setMenuBuilder(
         userId, Stocks.getStock(userId).chosenTrainer,
@@ -26,4 +26,4 @@ async function deposit_response(interaction) {
     });
 }
 
-module.exports = deposit_response;
+module.exports = deposit;

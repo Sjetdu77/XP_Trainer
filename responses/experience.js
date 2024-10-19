@@ -9,7 +9,7 @@ const { getName } = require('../datas/generalFunctions');
  * @param {StringSelectMenuInteraction} interaction 
  * @returns 
  */
-async function experience_response(interaction) {
+async function experience(interaction) {
     const userId = interaction.user.id;
     const stock = Stocks.getStock(userId);
     const creature = stock.team[interaction.values[0]];
@@ -28,4 +28,4 @@ async function experience_response(interaction) {
     stock.clear();
 }
 
-module.exports = experience_response;
+module.exports = experience;

@@ -9,7 +9,7 @@ const { Stocks } = require('../datas/stock');
  * @param {OmitPartialGroupDMChannel<Message<boolean>>} message 
  * @returns 
  */
-async function rename_type_response(message) {
+async function rename_type(message) {
     const userId = message.author.id;
     const stock = Stocks.getStock(userId);
 	const nickname = message.content.trim();
@@ -21,4 +21,4 @@ async function rename_type_response(message) {
     stock.clear();
 }
 
-module.exports = rename_type_response;
+module.exports = rename_type;

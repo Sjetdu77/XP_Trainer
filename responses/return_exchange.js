@@ -9,7 +9,7 @@ const { setMenuBuilder } = require('../datas/generalFunctions');
  * @param {StringSelectMenuInteraction} interaction 
  * @returns 
  */
-async function return_exchange_response(interaction) {
+async function return_exchange(interaction) {
     const userId = interaction.user.id;
     const stock = Stocks.getStock(userId);
     stock.creature = stock.team[interaction.values[0]];
@@ -21,4 +21,4 @@ async function return_exchange_response(interaction) {
     });
 }
 
-module.exports = return_exchange_response;
+module.exports = return_exchange;

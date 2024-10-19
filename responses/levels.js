@@ -2,27 +2,27 @@ const {
     StringSelectMenuInteraction
 } = require('discord.js');
 const { Stocks } = require('../datas/stock');
+const { getName } = require('../datas/generalFunctions');
 
 /**
  * 
  * @param {StringSelectMenuInteraction} interaction 
  * @returns 
  */
-async function leave_response(interaction) {
+async function levels(interaction) {
     const userId = interaction.user.id;
     const stock = Stocks.getStock(userId);
     const creature = stock.team[interaction.values[0]];
-    const exchanged = stock.creature;
 
-    creature.update({ place: 'exchanged' });
-    exchanged.update({ place: 'team' });
-
+    const name = await getName(creature);
+    const levels = stock.datas.lvls;
+    creature.gainLevels(levels);
     await interaction.update({
-        content: `Echange accomplie !`,
-        components: [ ]
+        content: `${name} gagne ${levels} niveau${levels > 1 ? 'x' : ''}.`,
+        components: []
     });
 
     stock.clear();
 }
 
-module.exports = leave_response;
+module.exports = levels;

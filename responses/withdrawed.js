@@ -9,7 +9,7 @@ const { Stocks } = require('../datas/stock');
  * @param {OmitPartialGroupDMChannel<Message<boolean>>} message 
  * @returns 
  */
-async function withdrawed_response(message) {
+async function withdrawed(message) {
     const userId = message.author.id;
     const stock = Stocks.getStock(userId);
 	const content = message.content;
@@ -33,4 +33,4 @@ async function withdrawed_response(message) {
     stock.clear();
 }
 
-module.exports = withdrawed_response;
+module.exports = withdrawed;

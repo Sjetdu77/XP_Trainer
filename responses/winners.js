@@ -8,7 +8,7 @@ const { getName } = require('../datas/generalFunctions');
  * 
  * @param {StringSelectMenuInteraction} interaction 
  */
-async function winners_response(interaction) {
+async function winners(interaction) {
     const userId = interaction.user.id;
     const stock = Stocks.getStock(userId);
     let content = ``;
@@ -29,4 +29,4 @@ async function winners_response(interaction) {
     stock.clear();
 }
 
-module.exports = winners_response;
+module.exports = winners;

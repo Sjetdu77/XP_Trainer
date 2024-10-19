@@ -9,7 +9,7 @@ const { getName, createCreature } = require('../datas/generalFunctions');
  * @param {StringSelectMenuInteraction} interaction 
  * @returns 
  */
-async function exchange_solo_response(interaction) {
+async function exchange_solo(interaction) {
     const userId = interaction.user.id;
     const stock = Stocks.getStock(userId);
     const creatureData = stock.datas;
@@ -43,4 +43,4 @@ async function exchange_solo_response(interaction) {
     stock.clear();
 }
 
-module.exports = exchange_solo_response;
+module.exports = exchange_solo;

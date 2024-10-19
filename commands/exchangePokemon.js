@@ -31,10 +31,6 @@ module.exports = {
         const userId = interaction.user.id;
         const stock = Stocks.getStock(userId);
         const allOptions = interaction.options;
-        if (typeof component === 'string') return await interaction.reply({
-            content: component,
-            ephemeral: true
-        });
 
         let nickname = allOptions.getString('nickname');
         if (nickname) nickname = nickname.trim();

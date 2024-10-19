@@ -11,7 +11,7 @@ const { getName, setAllOptions } = require('../datas/generalFunctions');
  * @param {StringSelectMenuInteraction} interaction 
  * @returns 
  */
-async function happiness_response(interaction) {
+async function happiness(interaction) {
     const userId = interaction.user.id;
     const stock = Stocks.getStock(userId);
     const options = await setAllOptions(userId, stock.chosenTrainer);
@@ -51,4 +51,4 @@ async function happiness_response(interaction) {
     })
 }
 
-module.exports = happiness_response;
+module.exports = happiness;

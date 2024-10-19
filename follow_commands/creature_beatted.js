@@ -1,12 +1,12 @@
 const {
-    ChatInputCommandInteraction
+    StringSelectMenuInteraction
 } = require('discord.js');
 const { createCreature, setMenuBuilder } = require("../datas/generalFunctions");
 const { Stocks } = require("../datas/stock");
 
 /**
  * 
- * @param {ChatInputCommandInteraction} interaction 
+ * @param {StringSelectMenuInteraction} interaction 
  * @returns 
  */
 async function creature_beatted(interaction) {

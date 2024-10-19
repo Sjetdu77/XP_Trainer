@@ -3,6 +3,8 @@ const correction_xp = require("./follow_commands/correction_xp");
 const creature_beatted = require("./follow_commands/creature_beatted");
 const evolution = require("./follow_commands/evolution");
 const exchange_pokemon = require("./follow_commands/exchange_pokemon");
+const exchange_trainer_1 = require("./follow_commands/exchange_trainer_1");
+const exchange_trainer_2 = require("./follow_commands/exchange_trainer_2");
 const get_happiness = require("./follow_commands/get_happiness");
 const get_lvls = require("./follow_commands/get_lvls");
 const get_new_pokemon = require("./follow_commands/get_new_pokemon");
@@ -21,5 +23,7 @@ module.exports = {
     get_new_pokemon,
     get_xp,
     rename_pokemon,
-    return_exchanged
+    return_exchanged,
+    exchange_trainer_1,
+    exchange_trainer_2,
 }

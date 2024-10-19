@@ -1,5 +1,5 @@
 const {
-    ChatInputCommandInteraction,
+    StringSelectMenuInteraction,
     ActionRowBuilder,
     StringSelectMenuBuilder
 } = require('discord.js');
@@ -8,7 +8,7 @@ const { Stocks } = require("../datas/stock");
 
 /**
  * 
- * @param {ChatInputCommandInteraction} interaction 
+ * @param {StringSelectMenuInteraction} interaction 
  * @returns 
  */
 async function change_place(interaction) {

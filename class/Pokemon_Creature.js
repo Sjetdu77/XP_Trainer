@@ -9,22 +9,29 @@ class Pokemon_Creature extends Model {
     }
 
     /**
+     * @param {Pokemon_Specie} specie 
+     */
+    firstPart = specie => specie.baseXP * this.level / 5;
+
+    /**
+     * 
+     * @param {Pokemon_Creature} foe 
+     */
+    secondPart = foe => ((2 * foe.level + 10) / (foe.level + this.level + 10))**2.5 + 1;
+
+    /**
      * 
      * @param {Pokemon_Creature} foe 
      * @param {boolean} participate 
      * @returns 
      */
     async gainXPViaFoe(foe, participate = false) {
-        const trainer = await this.getTrainer();
-        const foesSpecie = await foe.getSpecie();
-        const trainerDatas = await trainer.getDatasFromTrainer();
-
-        let firstPart = foesSpecie.baseXP * foe.level / 5;
+        let firstPart = foe.firstPart(await foe.getSpecie());
         if (!participate) firstPart /= 2;
-        
-        let experience = firstPart * ((2 * foe.level + 10) / (foe.level + this.level + 10))**2.5 + 1;
-        if (this.exchanged) experience *= 1.5;
-        if (trainerDatas.getLuckyEgg) experience *= 1.5;
+
+        let experience = firstPart * this.secondPart(foe);
+        if (this.isExchanged()) experience *= 1.5;
+        if ((await (await this.getTrainer()).getDatasFromTrainer()).getLuckyEgg) experience *= 1.5;
         if (await this.canEvolute()) experience *= 1.5;
         if (this.happiness >= 200) experience *= 1.2;
 
@@ -89,12 +96,10 @@ class Pokemon_Creature extends Model {
         const foesSpecie = await foe.getSpecie();
         const trainerDatas = await trainer.getDatasFromTrainer();
         
-        let experience1 = ((foesSpecie.baseXP * foe.level / 5)
-                * ((2 * foe.level + 10) / (foe.level + this.level + 10))**2.5 + 1);
-        let experience2 = ((foesSpecie.baseXP * foe.level / 10)
-                * ((2 * foe.level + 10) / (foe.level + this.level + 10))**2.5 + 1);
+        let experience1 = foe.firstPart(foesSpecie) * this.secondPart(foe);
+        let experience2 = foe.firstPart(foesSpecie) / 2 * this.secondPart(foe);
         
-        if (this.exchanged) {
+        if (this.isExchanged()) {
             experience1 *= 1.5;
             experience2 *= 1.5;
         }
@@ -226,6 +231,8 @@ class Pokemon_Creature extends Model {
         this.sootheBell = !this.sootheBell;
         this.save();
     }
+
+    isExchanged = () => this.team !== this.captured;
 }
 
 Pokemon_Creature.init({

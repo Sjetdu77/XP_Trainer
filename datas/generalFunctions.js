@@ -115,7 +115,10 @@ async function setAllOptions(userId, trainer, place='team') {
 
     const creatures = await trainer.getCreatures({
         where: { place },
-        include: [ Pokemon_Creature.Specie ]
+        include: [
+            Pokemon_Creature.Specie,
+            Pokemon_Creature.Trainer
+        ]
     });
 
     let options = [], teamSaved = {};
@@ -172,43 +175,47 @@ async function getName(creature) {
  * 
  * @param {string} userId 
  * @param {string} mode 
+ * @param {Pokemon_Trainer | null} other 
  * @returns {Promise<{
  *  content: string,
  *  components: ActionRowBuilder | null,
  *  ephemeral: boolean | null
  * }>}
  */
-async function getTrainers(userId, mode) {
+async function getTrainers(userId, mode, other=null) {
     const stock = Stocks.getStock(userId);
     const trainers = await Pokemon_Trainer.findAll({ where: { userId }, include: [
         Pokemon_Trainer.Team,
         Pokemon_Trainer.Captured
     ] });
     if (trainers.length === 0) return {
-        content: `Désolé, mais vous n'avez pas de Dresseur. Veuillez utiliser /create_trainer.`,
+        content: `Désolé, mais ${other ? "il n'a" : "vous n'avez"} pas de Dresseur.${other ? '' : " Veuillez utiliser /create_trainer."}`,
         ephemeral: true
     }
 
     let options = [], trainersSaved = {};
     for (const trainer of trainers) {
-        const creaturesLength = (await trainer.getCreatures({ where: {
-            [Op.or]: [
-                { place: 'team' },
-                { place: 'computer' }
-            ]
-        } })).length;
-        trainersSaved[`${trainer.id}`] = trainer;
-        options.push({
-            label: trainer.name,
-            description: `${creaturesLength} pokémon${creaturesLength > 1 ? 's' : ''}`,
-            value: `${trainer.id}`
-        });
+        if (!other || other.id !== trainer.id) {
+            const creaturesLength = (await trainer.getCreatures({ where: {
+                [Op.or]: [
+                    { place: 'team' },
+                    { place: 'computer' }
+                ]
+            } })).length;
+            trainersSaved[`${trainer.id}`] = trainer;
+            options.push({
+                label: trainer.name,
+                description: `${creaturesLength} pokémon${creaturesLength > 1 ? 's' : ''}`,
+                value: `${trainer.id}`
+            });
+    
+        }
     }
     stock.trainers = trainersSaved;
     stock.mode = mode;
 
     return {
-        content: `Quel Dresseur est concerné ?`,
+        content: `Quel${other ? ' autre' : ''} Dresseur est concerné ?`,
         components: [
             new ActionRowBuilder()
                 .addComponents(

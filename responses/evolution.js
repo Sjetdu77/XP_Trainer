@@ -9,16 +9,17 @@ const { getName } = require('../datas/generalFunctions');
  * @param {StringSelectMenuInteraction} interaction 
  * @returns 
  */
-async function set_happiness_response(interaction) {
+async function evolution(interaction) {
     const userId = interaction.user.id;
     const stock = Stocks.getStock(userId);
-    const creature = stock.team[interaction.values[0]];
-    const gain = creature.changeHappiness(stock.datas);
+    const creature = stock.creature;
+    const name = await getName(creature);
+    const newSpecie = await creature.evolution(stock.team[interaction.values[0]]);
 
     return await interaction.update({
-        content: `${await getName(creature)} a maintenant ${gain} points de bonheur.\n`,
+        content: `${name} a évolué en ${newSpecie.getSpecieName()} !`,
         components: []
     });
 }
 
-module.exports = set_happiness_response;
+module.exports = evolution;

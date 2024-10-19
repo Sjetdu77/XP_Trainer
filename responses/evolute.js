@@ -12,7 +12,7 @@ const { getName } = require('../datas/generalFunctions');
  * @param {StringSelectMenuInteraction} interaction 
  * @returns 
  */
-async function evolute_response(interaction) {
+async function evolute(interaction) {
     const userId = interaction.user.id;
     const stock = Stocks.getStock(userId);
     const creature = stock.team[interaction.values[0]];
@@ -54,4 +54,4 @@ async function evolute_response(interaction) {
     }
 }
 
-module.exports = evolute_response;
+module.exports = evolute;

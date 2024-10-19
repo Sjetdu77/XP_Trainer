@@ -10,7 +10,7 @@ const { getName } = require('../datas/generalFunctions');
  * @param {StringSelectMenuInteraction} interaction 
  * @returns 
  */
-async function withdraw_response(interaction) {
+async function withdraw(interaction) {
     const userId = interaction.user.id;
     const stock = Stocks.getStock(userId);
     const trainer = stock.chosenTrainer;
@@ -49,7 +49,7 @@ async function withdraw_response(interaction) {
     }
 
     stock.creature = values;
-    stock.mode = 'withdraw';
+    stock.mode = 'withdrawed';
 
     await interaction.update({
         content: 'Choisissez les pokémons à retirer. (pour retirer plusieurs pokémons, mettez des virgules entre les pokémons)',
@@ -58,4 +58,4 @@ async function withdraw_response(interaction) {
     })
 }
 
-module.exports = withdraw_response;
+module.exports = withdraw;
